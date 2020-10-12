@@ -43,7 +43,7 @@ let rec fv = function (* 式に出現する自由な変数 (caml2html: knormal_f
 
 let insert_let (e, t) k = (* letを挿入する補助関数 (caml2html: knormal_insert) *)
   match e with
-  | Var(x) -> k x
+  | Var(x) -> k x (* 最初から変数のものはそのまま  置き換える必要ないよね〜*)
   | _ ->
       let x = Id.gentmp t in
       let e', t' = k x in
@@ -51,7 +51,7 @@ let insert_let (e, t) k = (* letを挿入する補助関数 (caml2html: knormal_
 
 let rec g env = function (* K正規化ルーチン本体 (caml2html: knormal_g) *)
   | Syntax.Unit -> Unit, Type.Unit
-  | Syntax.Bool(b) -> Int(if b then 1 else 0), Type.Int (* ������true, false������1, 0���Ѵ� (caml2html: knormal_bool) *)
+  | Syntax.Bool(b) -> Int(if b then 1 else 0), Type.Int (* boolを0,1に変換 (caml2html: knormal_bool) *)
   | Syntax.Int(i) -> Int(i), Type.Int
   | Syntax.Float(d) -> Float(d), Type.Float
   | Syntax.Not(e) -> g env (Syntax.If(e, Syntax.Bool(false), Syntax.Bool(true)))
