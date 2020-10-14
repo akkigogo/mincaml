@@ -1,0 +1,49 @@
+課題１
+Syntax.tとKNormal.tに対応する出力関数をdebug.mlに定義した。それらを用いて構文解析直後、K正規化後、alpha変換後などをdebug.txtに出力するようにした。
+分かりやすいように塊ごとに()でくくるようにした。
+
+実行例
+**        fib.ml        **
+
+let rec fib n =
+  if n <= 1 then n else
+  fib (n - 1) + fib (n - 2) in
+print_int (fib 30)
+
+Syntax
+(LETREC fib n (IF (LE (VAR n)(INT 1))(VAR n)(ADD (APP (VAR fib)(SUB (VAR n)(INT 1)))(APP (VAR fib)(SUB (VAR n)(INT 2)))))(APP (VAR print_int)(APP (VAR fib)(INT 30))))
+KNormal
+(LETREC fib n (LET Ti3 (INT 1)(IFLE n Ti3(VAR n)(LET Ti6 (LET Ti5 (LET Ti4 (INT 1)(SUB n Ti4))(APP fib)Ti5))(LET Ti9 (LET Ti8 (LET Ti7 (INT 2)(SUB n Ti7))(APP fib)Ti8))(ADD Ti6 Ti9))))(LET Ti2 (LET Ti1 (INT 30)(APP fib)Ti1))(EXTFUNAPP print_int Ti2)))
+Alpha
+(LETREC fib.19 n.20 (LET Ti12.23 (INT 1)(IFLE n.20 Ti12.23(VAR n.20)(LET Ti15.24 (LET Ti14.28 (LET Ti13.29 (INT 1)(SUB n.20 Ti13.29))(APP fib.19)Ti14.28))(LET Ti18.25 (LET Ti17.26 (LET Ti16.27 (INT 2)(SUB n.20 Ti16.27))(APP fib.19)Ti17.26))(ADD Ti15.24 Ti18.25))))(LET Ti11.21 (LET Ti10.22 (INT 30)(APP fib.19)Ti10.22))(EXTFUNAPP print_int Ti11.21))
+
+
+課題２
+lexerでのエラーとparserでのエラー時に行数を出すように変更した。
+
+lexbufの構造体のメンバであるlex_curr_pのpos_lnumが行数を示しているので,lexer.mllでのエラー時の行数出力はそれをそのまま出力した。
+また、lexerで'\n'を受け取った際にLexing.newlineを呼ぶようにした。
+
+また、parserの方でもsymbol_start_posで返されるLexing.position構造体に同じようにpos_lnumがあるので、それを出力すれば行数出力ができる。
+
+実行例
+
+fib.ml (lexing error version)
+
+let rec fib n =
+  if n <= 1 then n else
+  fib (n - 1) + fib (n - 2) inあ
+print_int (fib 30)
+
+エラー表示
+Fatal error: exception Failure("unknown token � near line: 3 characters 70-71")
+
+fib.ml (parse error version)
+
+let rec fib n =
+  if n <= 1 then n else
+  fib (n - 1) + fib (n - 2) inあ
+print_int (fib 30)
+
+エラー表示
+Fatal error: exception Failure("parse error near line:3 characters 30-31")

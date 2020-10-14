@@ -13,6 +13,7 @@ main.cmo : \
     elim.cmi \
     debug.cmi \
     constFold.cmi \
+    commondelete.cmi \
     closure.cmi \
     beta.cmi \
     assoc.cmi \
@@ -33,6 +34,7 @@ main.cmx : \
     elim.cmx \
     debug.cmx \
     constFold.cmx \
+    commondelete.cmx \
     closure.cmx \
     beta.cmx \
     assoc.cmx \

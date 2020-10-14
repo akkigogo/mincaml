@@ -10,9 +10,16 @@ let rec iter n e = (* ��Ŭ�������򤯤꤫���� (caml2htm
 let lexbuf outchan l = (* �Хåե��򥳥�ѥ��뤷�ƥ����ͥ�ؽ��Ϥ��� (caml2html: main_lexbuf) *)
   Id.counter := 0;
   Typing.extenv := M.empty;
-  let debug_outchan = open_out ("debug.txt") in
+  let debug_outchan = open_out ("debug.txt") in  (* debug.txtにデバッグ用コードを出力 *)
    let s1 = Parser.exp Lexer.token l in
+   Printf.fprintf debug_outchan "Syntax\n"; (* Syntax.tを出力 *)
    Debug.out_parser debug_outchan s1;
+   Printf.fprintf debug_outchan "\nKNormal\n"; (* KNormal.tを出力 *)
+   Debug.out_knormal debug_outchan (KNormal.f (Typing.f s1));
+   Printf.fprintf debug_outchan "\nAlpha\n"; (* alpha変換後のNormal.tを出力 *) 
+   Debug.out_knormal debug_outchan (Alpha.f (KNormal.f (Typing.f s1)));
+   Printf.fprintf debug_outchan "\nkyoutuusakujogo\n"; (* 共通部分式削除 を出力*)
+   Debug.out_knormal debug_outchan (Commondelete.f (Alpha.f (KNormal.f (Typing.f s1))));
   Emit.f outchan
     (RegAlloc.f
        (Simm.f
