@@ -1,0 +1,46 @@
+問1
+
+K正規化 + alpha変換
+
+let rec x8 x = 
+    let x6 = let x2 = let x1 = (-x) in x - x1 in
+        let x5 = (let x3 = (-x2) in let x4 = (-x3) in x3 - x4) in
+            x2 - x5 in
+    let x7 = (-x6) in x6 - x7 in
+let x9 = x8 125 in let x10 = (-x9) in x9 - x10
+
+A正規化 + alpha変換
+
+let rec x8 x =
+    let x1 = (-x) in
+    let x2 = x - (x1) in
+    let x3 = (-x2) in
+    let x4 = (-x3) in
+    let x5 = x3 - x4 in
+    let x6 = x2 - x5 in
+    let x7 = (-x6) in
+    x6 - x7 in
+    let x9 = x8 125 in
+    let x10 = (-x9) in
+    x9 - x10 
+
+問2
+
+let rec f x y = let a = x + y in let b = x + y in a + b in print_int(f 3 2)
+
+debug.txtに出力した。
+K正規化 + alpha変換後
+(LETREC f.7 x.8 y.9 (LET a.13 (ADD x.8 y.9)(LET b.14 (ADD x.8 y.9)(ADD a.13 b.14)))(LET Ti6.10 (LET Ti4.11 (INT 3)(LET Ti5.12 (INT 2)(APP f.7)Ti4.11Ti5.12)))(EXTFUNAPP print_int Ti6.10)))
+
+共通部分式削除後
+(LETREC f.18 x.19 y.20 (LET a.24 (ADD x.19 y.20)(LET b.25 (VAR a.24)(ADD a.24 b.25)))(LET Ti17.21 (LET Ti15.22 (INT 3)(LET Ti16.23 (INT 2)(APP f.18)Ti15.22Ti16.23)))(EXTFUNAPP print_int Ti17.21)))
+
+共通部分式 x + y にあたる(ADD x.8 y.9)という共通式が上では2回書かれているが、下ではこの共通部分式はLET a.24 として纏められている。
+
+alpha変換が行われていない、つまりletによる変数の再定義があると共通部分式削除はうまくいかない。
+let rec f x y = let x = x + y in let b = x + y in x + b in print_int(f 3 2)
+のようなコードだと本来は12となって欲しいが、共通部分式削除により
+let rec f x y = let x = x + y in let b = x in x + b in print_int(f 3 2)
+となり、10となってしまう。
+
+

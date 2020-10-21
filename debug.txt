@@ -1,0 +1,8 @@
+Syntax
+(LETREC f x y (LET a (ADD (VAR x)(VAR y))(LET b (ADD (VAR x)(VAR y))(ADD (VAR a)(VAR b))))(APP (VAR print_int)(APP (VAR f)(INT 3)(INT 2))))
+KNormal
+(LETREC f x y (LET a (ADD x y)(LET b (ADD x y)(ADD a b)))(LET Ti3 (LET Ti1 (INT 3)(LET Ti2 (INT 2)(APP f)Ti1Ti2)))(EXTFUNAPP print_int Ti3)))
+Alpha
+(LETREC f.7 x.8 y.9 (LET a.13 (ADD x.8 y.9)(LET b.14 (ADD x.8 y.9)(ADD a.13 b.14)))(LET Ti6.10 (LET Ti4.11 (INT 3)(LET Ti5.12 (INT 2)(APP f.7)Ti4.11Ti5.12)))(EXTFUNAPP print_int Ti6.10)))
+kyoutuusakujogo
+(LETREC f.18 x.19 y.20 (LET a.24 (ADD x.19 y.20)(LET b.25 (VAR a.24)(ADD a.24 b.25)))(LET Ti17.21 (LET Ti15.22 (INT 3)(LET Ti16.23 (INT 2)(APP f.18)Ti15.22Ti16.23)))(EXTFUNAPP print_int Ti17.21)))

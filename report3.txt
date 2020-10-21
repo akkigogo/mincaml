@@ -1,0 +1,51 @@
+問１
+let one = 1 in let rec f x = x + one in f 1
+
+let rec f x = let one = 1 in x + one in f 1
+
+問い 3
+
+1.  let z = 4 in let rec f x = x – z in f 8
+
+let z = 4 in let rec f {z} x = x - z in 
+    let f' = <Lf, {z}> in
+        f'@8
+
+2.    let rec g x = x - 2 in g 6
+
+let rec g {} x = x - 2 in
+    g 6
+
+3.  let rec f x = x - 1 in f
+
+let rec f {} x = x - 1 in
+    f
+
+4.  let rec g h = let rec i x = h x in i in g
+
+let rec g {} h =
+    let rec i {h} x = h @ x in
+        let i' = <Li, {h}> in
+            i' in g
+
+
+5.  let rec i x = x in
+    let z = 4 in
+    let rec f = i (z - 5) in
+        if z < 6 then (i, f 7) else (f, 8)
+
+let rec i {} x = x in
+    let z = 4 in
+        let rec f {i, x, z} = i (z - 5) in
+            let f' = <Lf, {i, x, z}> in
+                if z < 6 then (i, f'@7) else (f', 8)
+
+6.  let rec fact x =
+        if x = 1 then 1
+        else x * fact (x - 1) in
+        fact 6
+
+let rec fact {} x =
+    if x = 1 then 1
+    else x * fact (x - 1) in
+    fact 6

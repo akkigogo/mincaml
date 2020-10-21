@@ -49,11 +49,11 @@ let seq(e1, e2) = Let((Id.gentmp Type.Unit, Type.Unit), e1, e2)
  非揮発性レジスタとは、関数呼び出しの前後で内容が変わっていてはいけないレジスタのことであり、%r1, %r2, %r11~%r31がこれに該当する。
  非揮発性レジスタは大きい方から順番に(%r31から順番に)用いる。*)
 let regs = (* Array.init 27 (fun i -> Printf.sprintf "_R_%d" i) *)
-  [| "%$t0"; "%$t1"; "%$t2"; "%$t3"; "%$t4"; "%$t5"; "%r10";
+  [| "%$a0"; "%$a1"; "%$a2"; "%$a3"; "%$t0"; "%$t1"; "%r10";
      "%r11"; "%r12"; "%r13"; "%r14"; "%r15"; "%r16"; "%r17"; "%r18";
      "%r19"; "%r20"; "%r21"; "%r22"; "%r23"; "%r24"; "%r25"; "%r26";
      "%r27"; "%r28"; "%r29"; "%r30" |]
-let fregs = Array.init 32 (fun i -> Printf.sprintf "%%f%d" i)
+let fregs = Array.init 32 (fun i -> Printf.sprintf "%%f%d" i)  (* 浮動小数点レジスタ *)
 let allregs = Array.to_list regs
 let allfregs = Array.to_list fregs
 let reg_cl = regs.(Array.length regs - 1) (* closure address (caml2html: sparcasm_regcl) *)
@@ -62,6 +62,7 @@ let reg_fsw = fregs.(Array.length fregs - 1) (* temporary for swap *)
 let reg_sp = "%$sp" (* stack pointer *)
 let reg_hp = "%r4" (* heap pointer (caml2html: sparcasm_reghp) *)   (* ppcのまま *)
 let reg_tmp = "%r31" (* [XX] ad hoc *)
+let reg_my_temp = "%$s1"
 let reg_zero = "%$zero"
 let reg_ra = "%$ra"
 let is_reg x = (x.[0] = '%')

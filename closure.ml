@@ -1,5 +1,5 @@
 type closure = { entry : Id.l; actual_fv : Id.t list }
-type t = (* �����������Ѵ���μ� (caml2html: closure_t) *)
+type t = (* クロージャ変換後の式 (caml2html: closure_t) *)
   | Unit
   | Int of int
   | Float of float
@@ -44,7 +44,8 @@ let rec fv = function
 
 let toplevel : fundef list ref = ref []
 
-let rec g env known = function (* �����������Ѵ��롼�������� (caml2html: closure_g) *)
+(* 「自由変数がないとわかっていて、普通に呼び出せる」関数の集合known *)
+let rec g env known = function (* クロージャ変換ルーチン本体 (caml2html: closure_g) *)
   | KNormal.Unit -> Unit
   | KNormal.Int(i) -> Int(i)
   | KNormal.Float(d) -> Float(d)
@@ -60,16 +61,16 @@ let rec g env known = function (* �����������Ѵ��롼�
   | KNormal.IfLE(x, y, e1, e2) -> IfLE(x, y, g env known e1, g env known e2)
   | KNormal.Let((x, t), e1, e2) -> Let((x, t), g env known e1, g (M.add x t env) known e2)
   | KNormal.Var(x) -> Var(x)
-  | KNormal.LetRec({ KNormal.name = (x, t); KNormal.args = yts; KNormal.body = e1 }, e2) -> (* �ؿ�����ξ�� (caml2html: closure_letrec) *)
-      (* �ؿ����let rec x y1 ... yn = e1 in e2�ξ��ϡ�
-         x�˼�ͳ�ѿ����ʤ�(closure��𤵤�direct�˸ƤӽФ���)
-         �Ȳ��ꤷ��known���ɲä���e1�򥯥��������Ѵ����Ƥߤ� *)
+  | KNormal.LetRec({ KNormal.name = (x, t); KNormal.args = yts; KNormal.body = e1 }, e2) -> (* 関数定義の場合 (caml2html: closure_letrec) *)
+      (*　関数定義let rec x y1 ... yn = e1 in e2の場合は,
+         xに自由変数がない(closureを介さず、directに呼び出せる)
+         と仮定し、knownに追加してe1をクロージャ変換してみる *)
       let toplevel_backup = !toplevel in
       let env' = M.add x t env in
       let known' = S.add x known in
       let e1' = g (M.add_list yts env') known' e1 in
-      (* �����˼�ͳ�ѿ����ʤ��ä������Ѵ����e1'���ǧ���� *)
-      (* ����: e1'��x���Ȥ��ѿ��Ȥ��ƽи��������closure��ɬ��!
+      (* 本当に自由変数がなかったか、変換結果e1'を確認する *)
+      (* 注意: e1'にx自身が変数として出現する場合はclosureが必要!
          (thanks to nuevo-namasute and azounoman; test/cls-bug2.ml����) *)
       let zs = S.diff (fv e1') (S.of_list (List.map fst yts)) in
       let known', e1' =
