@@ -88,3 +88,94 @@ let rec out_knormal oc exp = match exp with
   let k = f1.args in
   let e = f1.body in
   Printf.fprintf oc ("%s ") i1; out_knormal_arg oc k; out_knormal oc e
+
+  (* クロージャー変換後も出力
+  ちな、Letrec周りしか変わらないっすねー *)
+
+  (* type closure = { entry : Id.l; actual_fv : Id.t list }
+  type t = (* クロージャ変換後の式 (caml2html: closure_t) *)
+    | Unit
+    | Int of int
+    | Float of float
+    | Neg of Id.t
+    | Add of Id.t * Id.t
+    | Sub of Id.t * Id.t
+    | FNeg of Id.t
+    | FAdd of Id.t * Id.t
+    | FSub of Id.t * Id.t
+    | FMul of Id.t * Id.t
+    | FDiv of Id.t * Id.t
+    | IfEq of Id.t * Id.t * t * t
+    | IfLE of Id.t * Id.t * t * t
+    | Let of (Id.t * Type.t) * t * t
+    | Var of Id.t
+    | MakeCls of (Id.t * Type.t) * closure * t
+    | AppCls of Id.t * Id.t list
+    | AppDir of Id.l * Id.t list
+    | Tuple of Id.t list
+    | LetTuple of (Id.t * Type.t) list * Id.t * t
+    | Get of Id.t * Id.t
+    | Put of Id.t * Id.t * Id.t
+    | ExtArray of Id.l *)
+open Closure
+let out_id_l oc l1 = 
+  let (L (s)) = l1 in
+  Printf.fprintf oc ("%s ") s
+
+let rec out_closure_tuple oc t1 = match t1 with
+| [] -> Printf.fprintf oc ("");
+| e1::rest -> Printf.fprintf oc ("%s") e1; out_closure_tuple oc rest
+
+let rec out_closure_arg oc e =
+  match e with
+    |[] -> Printf.fprintf oc ("")
+    |(i1, _)::rest -> Printf.fprintf oc ("%s ") i1; out_closure_arg oc rest 
+
+    (* type closure = { entry : Id.l; actual_fv : Id.t list } *)
+let out_the_closure oc c1 =  (* まさにクロージャーを出力 *)
+  let i1 = c1.entry in
+  let afv = c1.actual_fv in
+  Printf.fprintf oc ("{entry: "); out_id_l oc i1; Printf.fprintf oc (" actual_fv "); out_closure_tuple oc afv; Printf.fprintf oc ("} ")
+
+let rec out_closure1 oc exp = match exp with
+    | Unit ->  Printf.fprintf oc ("(UNIT)")
+    | Int x ->  Printf.fprintf oc ("(INT %d)") x
+    | Float x ->  Printf.fprintf oc ("(FLOAT %f)") x
+    | Neg e1 ->  Printf.fprintf oc ("(NEG %s)") e1
+    | Add (e1, e2) ->  Printf.fprintf oc ("(ADD %s %s)") e1 e2
+    | Sub (e1, e2) ->  Printf.fprintf oc ("(SUB %s %s)") e1 e2
+    | FNeg e1 ->  Printf.fprintf oc ("(FNEG %s)") e1 
+    | FAdd (e1, e2) ->  Printf.fprintf oc ("(FADD %s %s)") e1 e2
+    | FSub (e1, e2) ->  Printf.fprintf oc ("(FSUB %s %s)") e1 e2
+    | FMul (e1, e2) ->  Printf.fprintf oc ("(FMUL %s %s)") e1 e2
+    | FDiv (e1, e2) ->  Printf.fprintf oc ("(FDIV %s %s)") e1 e2
+    | IfEq (s1, s2, e1, e2) -> Printf.fprintf oc ("(IFEQ %s %s") s1 s2; out_closure1 oc e1; out_closure1 oc e2
+    | IfLE (s1, s2, e1, e2) -> Printf.fprintf oc ("(IFLE %s %s") s1 s2; out_closure1 oc e1; out_closure1 oc e2
+    | Let ((i1, t1), e1, e2) ->  Printf.fprintf oc ("(LET %s ") i1; out_closure1 oc e1; out_closure1 oc e2; Printf.fprintf oc (")")
+    | Var e1 ->  Printf.fprintf oc ("(VAR %s)") e1
+    | MakeCls ((i1, t1), c1, e1) -> Printf.fprintf oc ("(MakeCls %s ") i1; out_the_closure oc c1; out_closure1 oc e1
+    | AppCls (i1, l1) -> Printf.fprintf oc ("(AppCls %s ") i1; out_closure_tuple oc l1; Printf.fprintf oc (")")
+    | AppDir (i1, l1) -> Printf.fprintf oc ("(AppDir "); out_id_l oc i1; out_closure_tuple oc l1; Printf.fprintf oc (")")
+    | Tuple l1 ->  Printf.fprintf oc ("(TUPLE "); out_closure_tuple oc l1; Printf.fprintf oc (")")
+    | LetTuple (l1 , e1 , e2) -> Printf.fprintf oc ("(LETTUPLE TUPLE( "); out_closure_arg oc l1; Printf.fprintf oc (") %s ") e1; out_closure1 oc e2
+    | Get (e1, e2) ->  Printf.fprintf oc ("(GET %s %s)") e1 e2
+    | Put (e1, e2, e3) ->  Printf.fprintf oc ("(PUT %s %s)") e1 e2
+    | ExtArray i1 -> Printf.fprintf oc ("(EXTARRAY "); out_id_l oc i1
+
+let out_closure_fundef oc f1 = 
+  let (i1, t1) = f1.name in
+  let k = f1.args in
+  let fv1 = f1.formal_fv in
+  let e = f1.body in
+  out_id_l oc i1; Printf.fprintf oc (" args: "); out_closure_arg oc k; Printf.fprintf oc (" fv: "); out_closure_arg oc fv1; Printf.fprintf oc (" body: ");  out_closure1 oc e
+    (* type fundef = { name : Id.l * Type.t;
+    args : (Id.t * Type.t) list;
+    formal_fv : (Id.t * Type.t) list;
+    body : t } *)
+
+let rec out_closure_fundef_lis oc = function
+    | [] -> ()
+    | f1::rest -> out_closure_fundef oc f1; Printf.fprintf oc ("\n"); out_closure_fundef_lis oc rest
+
+let out_closure oc  = function
+  | Prog (fl, e) -> out_closure_fundef_lis oc fl; out_closure1 oc e

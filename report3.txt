@@ -3,7 +3,7 @@ let one = 1 in let rec f x = x + one in f 1
 
 let rec f x = let one = 1 in x + one in f 1
 
-問い 3
+問3
 
 1.  let z = 4 in let rec f x = x – z in f 8
 

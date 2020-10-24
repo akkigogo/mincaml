@@ -309,9 +309,9 @@ let f oc (Prog(data, fundefs, e)) =
          Printf.fprintf oc "\t.long\t%ld\n" (gethi d);
          Printf.fprintf oc "\t.long\t%ld\n" (getlo d))
        data);
-  Printf.fprintf oc "\t.text\n";
+  (* Printf.fprintf oc "\t.text\n";
   Printf.fprintf oc "\t.globl _min_caml_start\n";
-  Printf.fprintf oc "\t.align 2\n";
+  Printf.fprintf oc "\t.align 2\n"; *)
   Printf.fprintf oc "\tj\t_min_caml_start\n";
   List.iter (fun fundef -> h oc fundef) fundefs;
   (* Printf.fprintf oc "_min_caml_start: # main entry point\n";
@@ -319,13 +319,13 @@ let f oc (Prog(data, fundefs, e)) =
   Printf.fprintf oc "\tstmw\tr30, -8(r1)\n";
   Printf.fprintf oc "\tstw\tr0, 8(r1)\n";
   Printf.fprintf oc "\tstwu\tr1, -96(r1)\n"; *)
-  Printf.fprintf oc "#\tmain program starts: \n";
+  (* Printf.fprintf oc "#\tmain program starts: \n"; *)
   Printf.fprintf oc "_min_caml_start:\n";
   Printf.fprintf oc "\taddi\t$sp, $sp, 4096\n";
   stackset := S.empty;
   stackmap := [];
   g oc (NonTail("_R_0"), e);
-  Printf.fprintf oc "#\tmain program ends\n";
+  (* Printf.fprintf oc "#\tmain program ends\n"; *)
   (* Printf.fprintf oc "\tmr\tr3, %s\n" regs.(0); *)
   (* Printf.fprintf oc "\tlwz\tr1, 0(r1)\n";
   Printf.fprintf oc "\tlwz\tr0, 8(r1)\n";

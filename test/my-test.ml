@@ -1,1 +1,3 @@
-let rec f x y = let a = x + y in let b = x + y in a + b in print_int(f 3 2)
+let z = 3 in let a = let rec f x = x - z in f 7 in
+let z = 2 in let b = f 3 in print (a + b)
+

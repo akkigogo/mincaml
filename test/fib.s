@@ -1,18 +1,15 @@
-	.text
-	.globl _min_caml_start
-	.align 2
 	j	_min_caml_start
-fib.59:
+fib.10:
 	slti	$s0, $a0, 2
-	beq	$zero, $s0, bne_else.73
+	beq	$zero, $s0, bne_else.24
 	jr	$ra
-bne_else.73:
+bne_else.24:
 	addi	$a1, $a0, -1
 	sw	$a0, 0($sp)
 	add	$a0, $zero, $a1
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	jal	fib.59
+	jal	fib.10
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
 	lw	$a1, 0($sp)
@@ -21,19 +18,18 @@ bne_else.73:
 	add	$a0, $zero, $a1
 	sw	$ra, 12($sp)
 	addi	$sp, $sp, 16
-	jal	fib.59
+	jal	fib.10
 	addi	$sp, $sp, -16
 	lw	$ra, 12($sp)
 	lw	$a1, 4($sp)
 	add	$a0, $a1, $a0
 	jr	$ra
-#	main program starts: 
 _min_caml_start:
 	addi	$sp, $sp, 4096
 	addi	$a0, $zero, 30
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	jal	fib.59
+	jal	fib.10
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
 	sw	$ra, 4($sp)
@@ -41,4 +37,3 @@ _min_caml_start:
 	jal	min_caml_print_int
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
-#	main program ends

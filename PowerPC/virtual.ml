@@ -72,8 +72,8 @@ let rec g env = function (* 式の仮想マシンコード生成 (caml2html: vir
       | Type.Unit -> Ans(Nop)
       | Type.Float -> Ans(FMr(x))
       | _ -> Ans(Mr(x)))
-  | Closure.MakeCls((x, t), { Closure.entry = l; Closure.actual_fv = ys }, e2) -> (* ��������������� (caml2html: virtual_makecls) *)
-      (* Closure�Υ��ɥ쥹�򥻥åȤ��Ƥ��顢��ͳ�ѿ����ͤ򥹥ȥ� *)
+  | Closure.MakeCls((x, t), { Closure.entry = l; Closure.actual_fv = ys }, e2) -> (* クロージャの生成 (caml2html: virtual_makecls) *)
+      (* Closureのアドレスをセットしてから、自由変数の値をストア *)
       let e2' = g (M.add x t env) e2 in
       let offset, store_fv =
         expand
@@ -93,7 +93,7 @@ let rec g env = function (* 式の仮想マシンコード生成 (caml2html: vir
   | Closure.AppDir(Id.L(x), ys) ->
       let (int, float) = separate (List.map (fun y -> (y, M.find y env)) ys) in
       Ans(CallDir(Id.L(x), int, float))
-  | Closure.Tuple(xs) -> (* �Ȥ����� (caml2html: virtual_tuple) *)
+  | Closure.Tuple(xs) -> (* 組の生成 (caml2html: virtual_tuple) *)
       let y = Id.genid "t" in
       let (offset, store) =
         expand

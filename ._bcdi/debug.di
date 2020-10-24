@@ -1,3 +1,4 @@
 debug.cmi : \
     syntax.cmo \
-    kNormal.cmi
+    kNormal.cmi \
+    closure.cmi

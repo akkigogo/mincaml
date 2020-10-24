@@ -15,22 +15,22 @@ let lexbuf outchan l = (* �Хåե��򥳥�ѥ��뤷�ƥ����ͥ�
    Printf.fprintf debug_outchan "Syntax\n"; (* Syntax.tを出力 *)
    Debug.out_parser debug_outchan s1;
    Printf.fprintf debug_outchan "\nKNormal\n"; (* KNormal.tを出力 *)
-   Debug.out_knormal debug_outchan (KNormal.f (Typing.f s1));
+   let s2 = KNormal.f (Typing.f s1) in
+   Debug.out_knormal debug_outchan s2;
    Printf.fprintf debug_outchan "\nAlpha\n"; (* alpha変換後のNormal.tを出力 *) 
-   Debug.out_knormal debug_outchan (Alpha.f (KNormal.f (Typing.f s1)));
+   let s3 = Alpha.f s2 in
+   Debug.out_knormal debug_outchan s3;
    Printf.fprintf debug_outchan "\nkyoutuusakujogo\n"; (* 共通部分式削除 を出力*)
-   Debug.out_knormal debug_outchan (Commondelete.f (Alpha.f (KNormal.f (Typing.f s1))));
+   let s4 = Commondelete.f s3 in
+   Debug.out_knormal debug_outchan s4;
+   Printf.fprintf debug_outchan "\nafter closure\n"; (* クロージャー変換後 *)
+   let s5 = Closure.f (iter !limit s4) in
+   Debug.out_closure debug_outchan s5;
   Emit.f outchan
     (RegAlloc.f
        (Simm.f
           (Virtual.f
-             (Closure.f
-                (iter !limit
-                  (Commondelete.f
-                   (Alpha.f
-                      (KNormal.f
-                         (Typing.f
-                           s1)))))))))
+             s5)))
 
 let string s = lexbuf stdout (Lexing.from_string s) (* 文字列をコンパイルして標準出力に表示する (caml2html: main_string) *)
 
