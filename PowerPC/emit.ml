@@ -1,7 +1,7 @@
 open Asm
 
 external gethi : float -> int32 = "gethi"
-external getlo : float -> int32 = "getlo"
+(* external getlo : float -> int32 = "getlo" *)
 
 let stackset = ref S.empty (* すでにSaveされた変数の集合 *)
 let stackmap = ref [] (* Saveされた変数の、スタックにおける位置 *)
@@ -64,11 +64,19 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
       let n = i lsr 16 in             (* iを右に16ビット右シフト *)
       let m = i lxor (n lsl 16) in
       let r = reg x in
-      Printf.fprintf oc "\tlis\t%s, %d\n" r n;
+      Printf.fprintf oc "\tlui\t%s, %d\n" r n;
       Printf.fprintf oc "\tori\t%s, %s, %d\n" r r m
-  | NonTail(x), FLi(Id.L(l)) ->
+  (* | NonTail(x), FLi(Id.L(l)) ->
       let s = load_label (reg reg_tmp) l in
-      Printf.fprintf oc "%s\tlfd\t%s, 0(%s)\n" s (reg x) (reg reg_tmp)
+      Printf.fprintf oc "%s\tlfd\t%s, 0(%s)\n" s (reg x) (reg reg_tmp) *)
+  | NonTail(x), FLi(f) ->
+     (* Printf.fprintf oc "\taddi\t%s, %s, %ld\n" (reg x) (reg reg_zero) (gethi f) *)
+     let i = Int32.to_int (gethi f) in
+     let n = i lsr 16 in             (* iを右に16ビット右シフト *)
+     let m = i lxor (n lsl 16) in
+     let r = reg x in
+     Printf.fprintf oc "\tlui\t%s, %d\n" r n;
+     Printf.fprintf oc "\tori\t%s, %s, %d\n" r r m 
   | NonTail(x), SetL(Id.L(y)) ->
       let s = load_label x y in
       Printf.fprintf oc "%s" s
@@ -80,7 +88,7 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
   | NonTail(x), Sub(y, V(z)) -> Printf.fprintf oc "\tsub\t%s, %s, %s\n" (reg x) (reg y) (reg z) (* ok *)
   | NonTail(x), Sub(y, C(z)) -> Printf.fprintf oc "\taddi\t%s, %s, %d\n" (reg x) (reg y) (-1 * z)  (* ok *)
   | NonTail(x), Slw(y, V(z)) -> Printf.fprintf oc "\tsw\t%s, %s, %s\n" (reg x) (reg y) (reg z)
-  | NonTail(x), Slw(y, C(z)) -> Printf.fprintf oc "\tslwi\t%s, %s, %d\n" (reg x) (reg y) z  (* shift left word*)
+  | NonTail(x), Slw(y, C(z)) -> Printf.fprintf oc "\tsll\t%s, %s, %d\n" (reg x) (reg y) z  (* shift left word  ok!*)
   | NonTail(x), Lwz(y, V(z)) -> Printf.fprintf oc "\tlw\t%s, %s, %s\n" (reg x) (reg y) (reg z)
   | NonTail(x), Lwz(y, C(z)) -> Printf.fprintf oc "\tlw\t%s, %d(%s)\n" (reg x) z (reg y)  (* ok *)
   | NonTail(_), Stw(x, y, V(z)) -> Printf.fprintf oc "\tstwx\t%s, %s, %s\n" (reg x) (reg y) (reg z)
@@ -88,10 +96,10 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
   | NonTail(x), FMr(y) when x = y -> ()
   | NonTail(x), FMr(y) -> Printf.fprintf oc "\tfmr\t%s, %s\n" (reg x) (reg y)
   | NonTail(x), FNeg(y) -> Printf.fprintf oc "\tfneg\t%s, %s\n" (reg x) (reg y)
-  | NonTail(x), FAdd(y, z) -> Printf.fprintf oc "\tfadd\t%s, %s, %s\n" (reg x) (reg y) (reg z)
-  | NonTail(x), FSub(y, z) -> Printf.fprintf oc "\tfsub\t%s, %s, %s\n" (reg x) (reg y) (reg z)
-  | NonTail(x), FMul(y, z) -> Printf.fprintf oc "\tfmul\t%s, %s, %s\n" (reg x) (reg y) (reg z)
-  | NonTail(x), FDiv(y, z) -> Printf.fprintf oc "\tfdiv\t%s, %s, %s\n" (reg x) (reg y) (reg z)
+  | NonTail(x), FAdd(y, z) -> Printf.fprintf oc "\tadd.s\t%s, %s, %s\n" (reg x) (reg y) (reg z) (* ok *)
+  | NonTail(x), FSub(y, z) -> Printf.fprintf oc "\tsub.s\t%s, %s, %s\n" (reg x) (reg y) (reg z) (* ok *)
+  | NonTail(x), FMul(y, z) -> Printf.fprintf oc "\tmul.s\t%s, %s, %s\n" (reg x) (reg y) (reg z) (* ok *)
+  | NonTail(x), FDiv(y, z) -> Printf.fprintf oc "\tdiv.s\t%s, %s, %s\n" (reg x) (reg y) (reg z) (* ok *)
   | NonTail(x), Lfd(y, V(z)) -> Printf.fprintf oc "\tlfdx\t%s, %s, %s\n" (reg x) (reg y) (reg z)
   | NonTail(x), Lfd(y, C(z)) -> Printf.fprintf oc "\tlfd\t%s, %d(%s)\n" (reg x) z (reg y)
   | NonTail(_), Stfd(x, y, V(z)) -> Printf.fprintf oc "\tstfdx\t%s, %s, %s\n" (reg x) (reg y) (reg z)
@@ -307,7 +315,7 @@ let f oc (Prog(data, fundefs, e)) =
          Printf.fprintf oc "\t.align 3\n";
          Printf.fprintf oc "%s:\t # %f\n" x d;
          Printf.fprintf oc "\t.long\t%ld\n" (gethi d);
-         Printf.fprintf oc "\t.long\t%ld\n" (getlo d))
+         (* Printf.fprintf oc "\t.long\t%ld\n" (getlo d) *))
        data);
   (* Printf.fprintf oc "\t.text\n";
   Printf.fprintf oc "\t.globl _min_caml_start\n";

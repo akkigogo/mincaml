@@ -68,7 +68,7 @@ let rec g env known = function (* クロージャ変換ルーチン本体 (caml2
       let toplevel_backup = !toplevel in
       let env' = M.add x t env in
       let known' = S.add x known in
-      let e1' = g (M.add_list yts env') known' e1 in
+      let e1' = g (M.add_list yts env') known' e1 in (* なぜe1をgに一回通すのか?? *)
       (* 本当に自由変数がなかったか、変換結果e1'を確認する *)
       (* 注意: e1'にx自身が変数として出現する場合はclosureが必要!
          (thanks to nuevo-namasute and azounoman; test/cls-bug2.ml����) *)

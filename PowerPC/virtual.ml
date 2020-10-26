@@ -35,7 +35,7 @@ let rec g env = function (* 式の仮想マシンコード生成 (caml2html: vir
   | Closure.Unit -> Ans(Nop)
   | Closure.Int(i) -> Ans(Li(i))
   | Closure.Float(d) ->
-      let l =
+      (* let l =
         try
           (* 既に定数テーブルにあったら再利用 *)
           let (l, _) = List.find (fun (_, d') -> d = d') !data in
@@ -44,7 +44,8 @@ let rec g env = function (* 式の仮想マシンコード生成 (caml2html: vir
           let l = Id.L(Id.genid "l") in
           data := (l, d) :: !data;
           l in
-      Ans(FLi(l))
+      Ans(FLi(l)) *)
+      Ans(FLi(d))
   | Closure.Neg(x) -> Ans(Neg(x))
   | Closure.Add(x, y) -> Ans(Add(x, V(y)))
   | Closure.Sub(x, y) -> Ans(Sub(x, V(y)))
