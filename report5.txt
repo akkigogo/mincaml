@@ -1,0 +1,48 @@
+問1
+挿入前
+let x = ... in
+let y = (if x <= 0 then f 1 else 2) in
+let z = (if x <= 3 then x - 4 else g 5) in
+    x - y - z
+
+let x = ... in
+    save(x);
+let y = (if x <= 0 then f 1 else 2) in
+    save(y);
+let z = let x = restore(x) in (if x <= 3 then x - 4 else g 5) in
+    let x = restore(x) in let y = restore(y) in x - y - z
+
+問2
+
+let rec sum n = if n = 0 then 0 else n + sum (n - 1) in sum 10
+
+悪いレジスタ割当
+sum:
+    bne $a0, $zero, tuzukeru
+    jr $ra 
+tuzukeru:
+    sw $a0, 4($sp)
+    addi $a2, $a0, -1
+    move $a0, $a2
+    jal sum
+    lw $a1, 4($sp)
+    add $a3, $a0, $a1
+    move $a0, $a3
+    jr $ra
+main:
+    addi $a0, 30
+
+良いレジスタ割り当て
+sum:
+    bne $a0, $zero, tuzukeru
+    jr $ra 
+tuzukeru:
+    sw $a0, 4($sp)
+    addi $a0, $a0, -1
+    jal sum
+    lw $a1, 4($sp)
+    add $a0, $a0, $a1
+    jr $ra
+main:
+    addi $a0, 30
+    jal sum

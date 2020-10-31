@@ -43,20 +43,6 @@ let rec fv = function
   | Put(x, y, z) -> S.of_list [x; y; z]
 
 let toplevel : fundef list ref = ref []
-let newtoplevel : fundef list ref = ref []
-
-exception Not_Found
-
-let rec find_fun label l = match l with
-  | [] ->  raise Not_Found
-  | fundef1 :: rest -> let (label1, _) = fundef1.name in 
-    if (label1 = label) 
-    then fundef1
-    else let L(funname) = label1 in let L(labelname) = label in Printf.fprintf stdout "%s %s\n" funname labelname; find_fun label rest
-
-let rec arg_name arglist = match arglist with
-  | [] -> []
-  | (a, b) :: rest -> a::(arg_name rest)
 
 (* 「自由変数がないとわかっていて、普通に呼び出せる」関数の集合known *)
 let rec g env known = function (* クロージャ変換ルーチン本体 (caml2html: closure_g) *)
@@ -82,7 +68,7 @@ let rec g env known = function (* クロージャ変換ルーチン本体 (caml2
       let toplevel_backup = !toplevel in
       let env' = M.add x t env in
       let known' = S.add x known in
-      let e1' = g (M.add_list yts env') known' e1 in (* なぜe1をgに一回通すのか?? A.e1内にxがさらに出てくるとき *)
+      let e1' = g (M.add_list yts env') known' e1 in (* なぜe1をgに一回通すのか?? *)
       (* 本当に自由変数がなかったか、変換結果e1'を確認する *)
       (* 注意: e1'にx自身が変数として出現する場合はclosureが必要!
          (thanks to nuevo-namasute and azounoman; test/cls-bug2.ml����) *)
@@ -95,25 +81,19 @@ let rec g env known = function (* クロージャ変換ルーチン本体 (caml2
          toplevel := toplevel_backup;
          let e1' = g (M.add_list yts env') known e1 in
          known, e1') in
-      let zs = S.elements (S.diff (fv e1') (S.add x (S.of_list (List.map fst yts)))) in (* 自由変数のリスト *)
+      let zs = S.elements (S.diff (fv e1') (S.add x (S.of_list (List.map fst yts)))) in (*自自由変数のリスト *)
       let zts = List.map (fun z -> (z, M.find z env')) zs in (* ここで自由変数zの型を引くために引数envが必要 *)
       toplevel := { name = (Id.L(x), t); args = yts; formal_fv = zts; body = e1' } :: !toplevel; (* トップレベル関数を追加 *)
-      (* newtoplevel := { name = (Id.L(x), t); args = yts@zts; formal_fv = []; body = e1' } :: !newtoplevel; *)
       let e2' = g env' known' e2 in
-      if S.mem x (fv e2') then (* xが変数としてe2'に出現する *)
+      if S.mem x (fv e2') then (* xが変数としてe2'に出現するか *)
         MakeCls((x, t), { entry = Id.L(x); actual_fv = zs }, e2') (* 出現していたら削除しない *)
       else
-        (Format.eprintf "elimina＾ing closure(s) %s@." x;
+        (Format.eprintf "eliminating closure(s) %s@." x;
          e2') (* 出現しなければMakeClsを削除 *)
   | KNormal.App(x, ys) when S.mem x known -> (* 関数適用の場合 (caml2html: closure_app) *)
       Format.eprintf "directly applying %s@." x;
       AppDir(Id.L(x), ys)
-  | KNormal.App(f, xs) -> 
-     (* (try
-      let thisfun = find_fun (L(f)) !toplevel in
-      let inserted_fv = arg_name thisfun.formal_fv in
-      AppDir(Id.L(f), xs@(inserted_fv)) 
-    with _ -> *) AppCls(f, xs)
+  | KNormal.App(f, xs) -> AppCls(f, xs)
   | KNormal.Tuple(xs) -> Tuple(xs)
   | KNormal.LetTuple(xts, y, e) -> LetTuple(xts, y, g (M.add_list xts env) known e)
   | KNormal.Get(x, y) -> Get(x, y)

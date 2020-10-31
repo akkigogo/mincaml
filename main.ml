@@ -20,7 +20,7 @@ let lexbuf outchan l = (* �Хåե��򥳥�ѥ��뤷�ƥ����ͥ�
    Printf.fprintf debug_outchan "\nAlpha\n"; (* alpha変換後のNormal.tを出力 *) 
    let s3 = Alpha.f s2 in
    Debug.out_knormal debug_outchan s3;
-   Printf.fprintf debug_outchan "\nkyoutuusakujogo\n"; (* 共通部分式削除 を出力*)
+   Printf.fprintf debug_outchan "\nafter Commondelete\n"; (* 共通部分式削除 を出力*)
    let s4 = Commondelete.f s3 in
    Debug.out_knormal debug_outchan s4;
    Printf.fprintf debug_outchan "\nafter closure\n"; (* クロージャー変換後 *)

@@ -43,3 +43,5 @@ let rec f a b c d =
       aa + ab + ac + ad + ae + af + ag + ah + ai + aj + ak + al + am + an in
   -z in
 print_int (f 1 2 3 4)
+
+(* ok *)

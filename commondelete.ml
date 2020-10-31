@@ -3,8 +3,7 @@ open KNormal
 let l = ref []
 
 let rec f e = match e with
-  | Unit | Int _ | Float _ -> e
-  | Neg _ | Add (_, _) | Sub (_, _) | FNeg _ | FAdd (_, _) | FSub (_, _) | FMul (_, _) | FDiv (_, _) | Var _ | App (_, _) | Tuple _
+  | Neg _ | Add (_, _) | Sub (_, _) | FNeg _ | FAdd (_, _) | FSub (_, _) | FMul (_, _) | FDiv (_, _) | Var _ | Tuple _
     -> (try List.assoc e !l with Not_found -> e)
   | IfEq (i1, i2, e1, e2) -> IfEq (i1, i2, (f e1), (f e2))
   | IfLE (i1, i2, e1, e2) -> IfLE (i1, i2, (f e1), (f e2))
