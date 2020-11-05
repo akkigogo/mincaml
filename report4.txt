@@ -1,0 +1,99 @@
+問2, 問3(途中まで)を同時にtuple_flattening.mlで行った。
+
+まず、問２のtupleの平坦化に関しては　関数flatten_tupleが相当する。
+変数とタプルの組を環境env1に持っておいて、タプルを再帰的に展開できなるまで展開していってその中の全ての変数を纏めて一つのタプルにしている。
+
+非常に簡単な例だが、
+f (1, (2, 3))
+を通すと、debug.txtのdebug結果によれば
+after closure
+(LET Ti1.7 (INT 1)(LET Ti2.9 (INT 2)(LET Ti3.10 (INT 3)(LET Tt4.8 (TUPLE Ti2.9Ti3.10)(LET Tt5.6 (TUPLE Ti1.7Tt4.8)(AppDir min_caml_pr Tt5.6))))))
+after tuple_flattening
+(LET Ti1.7 (INT 1)(LET Ti2.9 (INT 2)(LET Ti3.10 (INT 3)(LET Tt4.8 (TUPLE Ti2.9Ti3.10)(LET Tt5.6 (TUPLE Ti1.7Ti2.9Ti3.10)(AppDir min_caml_pr Tt5.6))))))
+となっていて、
+確かに   
+(LET Tt4.8 (TUPLE Ti2.9Ti3.10)(LET Tt5.6 (TUPLE Ti1.7Tt4.8)
+は
+(LET Tt4.8 (TUPLE Ti2.9Ti3.10)(LET Tt5.6 (TUPLE Ti1.7Ti2.9Ti3.10)となっていて、
+平坦化されている。
+
+
+
+次に問３のLetTupleの展開は、
+LetTuple (x1, x2,,,,) = l in e となっているとする。
+
+基本的には、lを環境e2に持っていて、l = (y1, y2,,,,,)となっているとすれば
+　
+Let x1 = y1 in let x2 =y2 in .....in e　とすれば良い。
+
+しかし、lの環境を作る上で問題が二つある。
+１つ目はlが平坦化されていると結果が変わってしまうことだが、これは e2 が定義された段階で環境に lを入れることで解決できる。
+
+2つ目としては、lが綺麗にtuple (y1, y2,,,,,) と持っていれば分かりやすいのだが　tuple になりゆるものは他にもあり得る。
+例えば、If文や、Let文、関数の返り値である。
+つまり、
+LetTuple (x1, x2,,,,) = If q then (y1, y2,,,,) else (z1, z2,,,,,)
+みたいなものは
+If q then Let x1 = y1 in Let x2 = y2 in ...... else Let x1 = z1 in Let x2 = z2 in...........みたいにしている。(関数open_LetTupleが該当)
+
+ちなみに、
+let rec f x = x + 1 in
+let l = if (f 2) > 1 then (0, 0) else (1, 1) in let (a, b) = l in print_int (a + b)
+
+において、クロージャー変換後は
+
+f.10  args: x.11  fv:  body: (LET Ti9.23 (INT 1)
+(ADD x.11 Ti9.23)
+(LET Ti1.22 (INT 2)
+(LET Ti2.16 (AppDir f.10 Ti1.22)
+(LET Ti3.17 (INT 1)
+(LET l.12 (IFLE Ti2.16 Ti3.17(LET Ti4.20 (INT 1)
+(LET Ti5.21 (INT 1)
+(TUPLE Ti4.20Ti5.21)(LET Ti6.18 (INT 0)
+(LET Ti7.19 (INT 0)
+(TUPLE Ti6.18Ti7.19)
+(LETTUPLE TUPLE( a.13 b.14 ) l.12)
+(LET Ti8.15 (ADD a.13 b.14)
+(AppDir min_caml_print_int Ti8.15)
+
+タプル平坦化後は
+
+f.10  args: x.11  fv:  body: (LET Ti9.23 (INT 1)
+(ADD x.11 Ti9.23)
+(LET Ti1.22 (INT 2)
+(LET Ti2.16 (AppDir f.10 Ti1.22)
+(LET Ti3.17 (INT 1)
+(LET l.12 (IFLE Ti2.16 Ti3.17(LET Ti4.20 (INT 1)
+(LET Ti5.21 (INT 1)
+(TUPLE Ti4.20Ti5.21)(LET Ti6.18 (INT 0)
+(LET Ti7.19 (INT 0)
+(TUPLE Ti6.18Ti7.19)
+(IFLE Ti2.16 Ti3.17(LET Ti4.20 (INT 1)
+(LET Ti5.21 (INT 1)
+(LET a.13 (VAR Ti4.20)
+(LET b.14 (VAR Ti5.21)
+(LET Ti8.15 (ADD a.13 b.14)
+(AppDir min_caml_print_int Ti8.15)(LET Ti6.18 (INT 0)
+(LET Ti7.19 (INT 0)
+(LET a.13 (VAR Ti6.18)
+(LET b.14 (VAR Ti7.19)
+(LET Ti8.15 (ADD a.13 b.14)
+(AppDir min_caml_print_int Ti8.15)
+
+分かりにくいが、
+クロージャー変換後の(LETTUPLE TUPLE( a.13 b.14 ) l.12)
+tuple_flatteningでは
+(IFLE Ti2.16 Ti3.17(LET Ti4.20 (INT 1)
+(LET Ti5.21 (INT 1)
+(LET a.13 (VAR Ti4.20)
+(LET b.14 (VAR Ti5.21)
+(LET Ti8.15 (ADD a.13 b.14)
+(AppDir min_caml_print_int Ti8.15)(LET Ti6.18 (INT 0)
+(LET Ti7.19 (INT 0)
+(LET a.13 (VAR Ti6.18)
+(LET b.14 (VAR Ti7.19)
+(LET Ti8.15 (ADD a.13 b.14)
+のようになっていて、Lettuple が消え、展開できている。
+
+関数の返り値をLetTupleで展開すると、外部関数は何が返ってくるか難しいし、外部関数でなくても関数が絡むとややこしいので今回実装できなかった。
+また、関数定義の部分(fundef list)も今回時間がなくてできなかった。ここは引数がタプルの場合などもあってややこしいが、最適化のタイミングで実装したい。

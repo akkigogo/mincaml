@@ -139,25 +139,25 @@ let out_the_closure oc c1 =  (* まさにクロージャーを出力 *)
 
 let rec out_closure1 oc exp = match exp with
     | Unit ->  Printf.fprintf oc ("(UNIT)")
-    | Int x ->  Printf.fprintf oc ("(INT %d)") x
+    | Int x ->  Printf.fprintf oc ("(INT %d)") x 
     | Float x ->  Printf.fprintf oc ("(FLOAT %f)") x
-    | Neg e1 ->  Printf.fprintf oc ("(NEG %s)") e1
-    | Add (e1, e2) ->  Printf.fprintf oc ("(ADD %s %s)") e1 e2
-    | Sub (e1, e2) ->  Printf.fprintf oc ("(SUB %s %s)") e1 e2
+    | Neg e1 ->  Printf.fprintf oc ("(NEG %s)") e1 
+    | Add (e1, e2) ->  Printf.fprintf oc ("(ADD %s %s)") e1 e2 
+    | Sub (e1, e2) ->  Printf.fprintf oc ("(SUB %s %s)") e1 e2 
     | FNeg e1 ->  Printf.fprintf oc ("(FNEG %s)") e1 
-    | FAdd (e1, e2) ->  Printf.fprintf oc ("(FADD %s %s)") e1 e2
-    | FSub (e1, e2) ->  Printf.fprintf oc ("(FSUB %s %s)") e1 e2
-    | FMul (e1, e2) ->  Printf.fprintf oc ("(FMUL %s %s)") e1 e2
-    | FDiv (e1, e2) ->  Printf.fprintf oc ("(FDIV %s %s)") e1 e2
-    | IfEq (s1, s2, e1, e2) -> Printf.fprintf oc ("(IFEQ %s %s") s1 s2; out_closure1 oc e1; out_closure1 oc e2
-    | IfLE (s1, s2, e1, e2) -> Printf.fprintf oc ("(IFLE %s %s") s1 s2; out_closure1 oc e1; out_closure1 oc e2
-    | Let ((i1, t1), e1, e2) ->  Printf.fprintf oc ("(LET %s ") i1; out_closure1 oc e1; out_closure1 oc e2; Printf.fprintf oc (")")
+    | FAdd (e1, e2) ->  Printf.fprintf oc ("(FADD %s %s)") e1 e2 
+    | FSub (e1, e2) ->  Printf.fprintf oc ("(FSUB %s %s)") e1 e2 
+    | FMul (e1, e2) ->  Printf.fprintf oc ("(FMUL %s %s)") e1 e2 
+    | FDiv (e1, e2) ->  Printf.fprintf oc ("(FDIV %s %s)") e1 e2 
+    | IfEq (s1, s2, e1, e2) -> Printf.fprintf oc ("(IFEQ %s %s") s1 s2; out_closure1 oc e1; out_closure1 oc e2 
+    | IfLE (s1, s2, e1, e2) -> Printf.fprintf oc ("(IFLE %s %s") s1 s2; out_closure1 oc e1; out_closure1 oc e2 
+    | Let ((i1, t1), e1, e2) ->  Printf.fprintf oc ("(LET %s ") i1; out_closure1 oc e1; Printf.fprintf oc ("\n"); out_closure1 oc e2
     | Var e1 ->  Printf.fprintf oc ("(VAR %s)") e1
     | MakeCls ((i1, t1), c1, e1) -> Printf.fprintf oc ("(MakeCls %s ") i1; out_the_closure oc c1; out_closure1 oc e1
     | AppCls (i1, l1) -> Printf.fprintf oc ("(AppCls %s ") i1; out_closure_tuple oc l1; Printf.fprintf oc (")")
     | AppDir (i1, l1) -> Printf.fprintf oc ("(AppDir "); out_id_l oc i1; out_closure_tuple oc l1; Printf.fprintf oc (")")
-    | Tuple l1 ->  Printf.fprintf oc ("(TUPLE "); out_closure_tuple oc l1; Printf.fprintf oc (")")
-    | LetTuple (l1 , e1 , e2) -> Printf.fprintf oc ("(LETTUPLE TUPLE( "); out_closure_arg oc l1; Printf.fprintf oc (") %s ") e1; out_closure1 oc e2
+    | Tuple l1 ->  Printf.fprintf oc ("(TUPLE "); out_closure_tuple oc l1;  Printf.fprintf oc (")")
+    | LetTuple (l1 , e1 , e2) -> Printf.fprintf oc ("(LETTUPLE TUPLE( "); out_closure_arg oc l1; Printf.fprintf oc (") %s)\n") e1; out_closure1 oc e2
     | Get (e1, e2) ->  Printf.fprintf oc ("(GET %s %s)") e1 e2
     | Put (e1, e2, e3) ->  Printf.fprintf oc ("(PUT %s %s)") e1 e2
     | ExtArray i1 -> Printf.fprintf oc ("(EXTARRAY "); out_id_l oc i1
@@ -178,4 +178,4 @@ let rec out_closure_fundef_lis oc = function
     | f1::rest -> out_closure_fundef oc f1; Printf.fprintf oc ("\n"); out_closure_fundef_lis oc rest
 
 let out_closure oc  = function
-  | Prog (fl, e) -> out_closure_fundef_lis oc fl; out_closure1 oc e
+  | Prog (fl, e) -> out_closure_fundef_lis oc fl; Printf.fprintf oc ("\n"); out_closure1 oc e

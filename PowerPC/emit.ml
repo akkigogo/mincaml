@@ -349,6 +349,7 @@ let f oc (Prog(data, fundefs, e)) =
   (* Printf.fprintf oc "#\tmain program starts: \n"; *)
   Printf.fprintf oc "_min_caml_start:\n";
   Printf.fprintf oc "\taddi\t$sp, $sp, 4096\n";
+  Printf.fprintf oc "\taddi\t$gp, $gp, 8192\n";
   stackset := S.empty;
   stackmap := [];
   g oc (NonTail("_R_0"), e);

@@ -1,5 +1,7 @@
-(* ¡ÖÁÇËÑ¡×¤Êknown function optimization¤Ç¤ÏÂÌÌÜ¤Ê¾ì¹ç *)
+(* ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡×¤ï¿½known function optimizationï¿½Ç¤ï¿½ï¿½ï¿½ï¿½Ü¤Ê¾ï¿½ï¿½ *)
 (* Cf. http://www.yl.is.s.u-tokyo.ac.jp/~sumii/pub/compiler-enshu-2002/Mail/8 *)
 let rec f x = x + 123 in
 let rec g y = f in
 print_int ((g 456) 789)
+
+(* ok *)
