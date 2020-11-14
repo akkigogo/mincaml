@@ -34,7 +34,46 @@ let l = if (f 2) > 1 then (0, 0) else (1, 1) in let (a, b) = l in print_int (a +
 (* 
 let a = x in let b = x *)
 
-let rec f x = (x, x) in let (a, b) = f 1 in a + b
+(* let rec f a = a in
+let rec ack x y k = 
+  k
+  (if x <= 0 then y + 1 else
+  if y <= 0 then ack (x - 1) 1 f
+  else let rec g r = ack (x - 1) r f in ack x (y - 1) g)
+  in print (ack 3 10 f) *)
 
+(* let l = Array.make 7 0 in print_int(l.(5)) *)
 
+(* let l = Array.make 3 2.1 in print_int(l.(1)) *)
 
+(* let rec mycos x = 1.0 -. x *. x /. 4.0 in pr (mysin 3.1) *)
+
+(* let l = int_to_float(1) in print_float(l) *)
+(* print (3.0) *)
+
+(* let rec f x = x + 1 in let y = if f 0 < 1 then f (f 0) else 0 in print_int (y) *)
+(* let rec f x = if x < 55 then 0 else 999 in print (f 13) *)
+
+(* let rec gcd m n =
+  if m <= 0 then n else
+  if m <= n then gcd m (n - m) else gcd n (m - n) in
+  print_int (gcd 21600 337500) *)
+
+    (* let rec ack x y =
+      if x <= 0 then y + 1 else
+      if y <= 0 then ack (x - 1) 1
+      else           ack (x - 1) (ack x (y - 1)) in
+  print_int (ack 3 10) *)
+
+let rec ack2 x y k2 = k2
+  (
+  let rec f a = a in
+  let rec ack x y k =
+    k
+    (if x <= 0 then y + 1 else
+    if y <= 0 then ack (x - 1) 1 f
+    else let rec g r = ack (x - 1) r f in ack x (y - 1) g)
+    in ack x y f)
+    in
+    let rec pr r = print_int r
+    in ack2 3 10 pr

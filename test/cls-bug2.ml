@@ -6,3 +6,5 @@ let rec f n =
    let a = Array.make 1 f in
    a.(0) (n - 1)) in
 f 9
+
+(*  IOが繰り返されるのでまだtestできない *)

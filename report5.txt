@@ -1,3 +1,4 @@
+
 問1
 挿入前
 let x = ... in
@@ -5,6 +6,7 @@ let y = (if x <= 0 then f 1 else 2) in
 let z = (if x <= 3 then x - 4 else g 5) in
     x - y - z
 
+普通
 let x = ... in
     save(x);
 let y = (if x <= 0 then f 1 else 2) in
@@ -12,10 +14,15 @@ let y = (if x <= 0 then f 1 else 2) in
 let z = let x = restore(x) in (if x <= 3 then x - 4 else g 5) in
     let x = restore(x) in let y = restore(y) in x - y - z
 
+これだと、例えばlet y = (if x <= 0 then f 1 else 2)において、x > 0 の場合に、xを退避させる必要はない。
+そこで、さらによくする時ifの中身で関数呼び出しがあり、変数の退避が必要な場合のみ退避させればよい
+
 問2
+以下の関数をアセンブリに直すことを考える。
 
 let rec sum n = if n = 0 then 0 else n + sum (n - 1) in sum 10
 
+（引数、返り値にa0を使っている)
 悪いレジスタ割当
 sum:
     bne $a0, $zero, tuzukeru
@@ -46,3 +53,6 @@ tuzukeru:
 main:
     addi $a0, 30
     jal sum
+
+悪いレジスタ割当だと計算結果をとりあえず別のレジスタに入れているが、良いレジスタ割当だと次に入れておきたいレジスタ（引数レジスタなど)
+に直接計算結果を入れている。

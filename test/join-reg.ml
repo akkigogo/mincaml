@@ -5,3 +5,5 @@ let rec h _ = 789 in
 let x = f () in
 let y = g () in
 print_int ((if h () = 0 then x - y else y - x) + x + y)
+
+(* ok *)

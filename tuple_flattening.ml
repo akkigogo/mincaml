@@ -4,6 +4,7 @@ open Id
 exception Myerror1
 exception Myerror2
 exception Myerror3
+exception Myerror4
 (* type t = (* クロージャ変換後の式 (caml2html: closure_t) *)
   | Unit
   | Int of int
@@ -130,4 +131,4 @@ let rec g tenv1 tenv2 exp = match exp with
 
 
 let rec f prog = match prog with
-  | Prog (fl, t) -> (fl,  g [] [] t)
+  | Prog (fl, t) -> Prog (fl,  g [] [] t)

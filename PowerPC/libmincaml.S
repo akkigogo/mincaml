@@ -214,7 +214,7 @@ fputc_lazy:
 	.indirect_symbol _fputc
 	.long	dyld_stub_binding_helper
 	.subsections_via_symbols	
-#	prerr_float
+#	prerr_float      標準エラー出力にfloatを出力
 	.text
 	.align 	2
 	.globl 	min_caml_prerr_float
@@ -453,7 +453,7 @@ floor_lazy:
 	.align	2
 	.globl	min_caml_int_of_float
 min_caml_int_of_float:
-	.globl	min_caml_truncate
+	.globl	min_caml_truncate        # = int_of_float...  
 min_caml_truncate:
 	stmw 	r30, -8(r1)
 	stwu 	r1, -64(r1)

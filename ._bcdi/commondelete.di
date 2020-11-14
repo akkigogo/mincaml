@@ -1,0 +1,2 @@
+commondelete.cmi : \
+    kNormal.cmi

@@ -12,22 +12,22 @@ let lexbuf outchan l = (* �Хåե��򥳥�ѥ��뤷�ƥ����ͥ�
   Typing.extenv := M.empty;
   let debug_outchan = open_out ("debug.txt") in  (* debug.txtにデバッグ用コードを出力 *)
    let s1 = Parser.exp Lexer.token l in
-   Printf.fprintf debug_outchan "Syntax\n"; (* Syntax.tを出力 *)
+   Printf.fprintf debug_outchan "Syntax\n\n"; (* Syntax.tを出力 *)
    Debug.out_parser debug_outchan s1;
-   Printf.fprintf debug_outchan "\nKNormal\n"; (* KNormal.tを出力 *)
+   Printf.fprintf debug_outchan "\nKNormal\n\n"; (* KNormal.tを出力 *)
    let s2 = KNormal.f (Typing.f s1) in
    Debug.out_knormal debug_outchan s2;
-   Printf.fprintf debug_outchan "\nAlpha\n"; (* alpha変換後のNormal.tを出力 *) 
+   Printf.fprintf debug_outchan "\nAlpha\n\n"; (* alpha変換後のNormal.tを出力 *) 
    let s3 = Alpha.f s2 in
    Debug.out_knormal debug_outchan s3;
-   Printf.fprintf debug_outchan "\nafter Commondelete\n"; (* 共通部分式削除 を出力*)
+   Printf.fprintf debug_outchan "\nafter Commondelete\n\n"; (* 共通部分式削除 を出力*)
    let s4 = Commondelete.f s3 in
    Debug.out_knormal debug_outchan s4;
-   Printf.fprintf debug_outchan "\nafter closure\n"; (* クロージャー変換後 *)
+   Printf.fprintf debug_outchan "\nafter closure\n\n"; (* クロージャー変換後 *)
    let s5 = Closure.f (iter !limit s4) in
    Debug.out_closure debug_outchan s5;
    let s6 = Tuple_flattening.f s5 in
-   Printf.fprintf debug_outchan "\nafter tuple_flattening\n"; 
+   Printf.fprintf debug_outchan "\nafter tuple_flattening\n\n"; 
    Debug.out_closure debug_outchan s6;
   Emit.f outchan
     (RegAlloc.f
