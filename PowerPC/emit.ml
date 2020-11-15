@@ -72,13 +72,20 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
       Printf.fprintf oc "%s\tlfd\t%s, 0(%s)\n" s (reg x) (reg reg_tmp) *)
   | NonTail(x), FLi(f) ->
      (* Printf.fprintf oc "\taddi\t%s, %s, %ld\n" (reg x) (reg reg_zero) (gethi f) *)
-     let i = Int32.to_int (gethi f) in
+     (* let i = Int32.to_int (gethi f) in
+     Printf.fprintf stdout "f: %f i : %d" f i;
      let n = i lsr 16 in             (* iを右に16ビット右シフト *)
      let m = i lxor (n lsl 16) in
      let r = reg x in
      Printf.fprintf oc "\tlui\t$s1, %d\n" n;
      Printf.fprintf oc "\tori\t$s1, $s1, %d\n" m ;
-     Printf.fprintf oc "\tmtc1\t%s, %s\n" x r
+     Printf.fprintf oc "\tmtc1\t$s1, %s\n" r *)
+     let i = Int32.bits_of_float f in
+     let a = Int32.shift_right i 16 in
+     let b = Int32.logand i (Int32.of_int 65535) in
+     Printf.fprintf oc "\tlui\t$s1, %d\n" (Int32.to_int a);
+     Printf.fprintf oc "\tori\t$s1, $s1, %d\n" (Int32.to_int b);
+     Printf.fprintf oc "\tmtc1\t$s1, %s\n" (reg x)
   | NonTail(x), SetL(Id.L(y)) ->
       (* let s = load_label x y in
       Printf.fprintf oc "%s" s *)
@@ -179,8 +186,15 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
       Printf.fprintf oc "\tslti\t$s0, %s, %d\n" (reg x) y;        (* (x < y thenとelseを逆に)   x >= y  *)
       g'_tail_if oc e2 e1 "bne" "beq"
   | Tail, IfFEq(x, y, e1, e2) ->
-      Printf.fprintf oc "\tfcmpu\t$s0, %s, %s\n" (reg x) (reg y);
-      g'_tail_if oc e1 e2 "beq" "bne"
+      (* Printf.fprintf oc "\tfcmpu\t$s0, %s, %s\n" (reg x) (reg y);
+      g'_tail_if oc e1 e2 "beq" "bne" *)
+      let b_else = Id.genid ("c.eq_else") in
+      Printf.fprintf oc "\tc.eq.s\t%s, %s, %s\n" (reg x) (reg y) b_else;
+      let stackset_back = !stackset in
+      g oc (Tail, e2);
+      Printf.fprintf oc "%s:\n" b_else;
+      stackset := stackset_back;
+      g oc (Tail, e1)
   | Tail, IfFLE(x, y, e1, e2) ->    (* ok *)
       Printf.fprintf oc "\tc.lt.s\t%s, %s\n" (reg x) (reg y);
       g'_tail_if oc e1 e2 "bne" "beq"
@@ -234,8 +248,22 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
       Printf.fprintf oc "\tslti\t$s0, %s, %d\n" (reg x) y;
       g'_non_tail_if oc (NonTail(z)) e2 e1 "bne" "beq"
   | NonTail(z), IfFEq(x, y, e1, e2) ->
-      Printf.fprintf oc "\tfcmpu\t$s0, %s, %s\n" (reg x) (reg y);
-      g'_non_tail_if oc (NonTail(z)) e1 e2 "beq" "bne"
+    let dest = NonTail(z) in
+    let b = "c.eq" in
+    let b_else = Id.genid (b ^ "_else") in
+    let b_cont = Id.genid (b ^ "_cont") in
+    Printf.fprintf oc "\tc.eq\t%s, %s, %s\n" (reg x) (reg y) b_else;
+    let stackset_back = !stackset in
+    g oc (dest, e2);
+    let stackset1 = !stackset in
+    Printf.fprintf oc "\tj\t%s\n" b_cont;
+    Printf.fprintf oc "%s:\n" b_else;
+    stackset := stackset_back;
+    g oc (dest, e1);
+    Printf.fprintf oc "%s:\n" b_cont;
+    let stackset2 = !stackset in
+    stackset := S.inter stackset1 stackset2;
+    stackset := S.inter stackset1 stackset2
   | NonTail(z), IfFLE(x, y, e1, e2) ->  (* ok *)
       Printf.fprintf oc "\tc.lt.s\t%s, %s\n" (reg x) (reg y);
       g'_non_tail_if oc (NonTail(z)) e1 e2 "bne" "beq"
@@ -250,6 +278,7 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
       if x = "min_caml_sqrt" then Printf.fprintf oc "\tsqrt\t$f0, $f0\n" else
       if x = "min_caml_floor" then Printf.fprintf oc "\tfloor\t$f0, $f0\n" else
       if x = "min_caml_int_of_float" then Printf.fprintf oc "\tftoi\t$a0, $f0\n" else
+      if x = "min_caml_truncate" then Printf.fprintf oc "\tftoi\t$a0, $f0\n" else
       if x = "min_caml_float_of_int" then Printf.fprintf oc "\titof\t$f0, $a0\n" else
       Printf.fprintf oc "\tj\t%s\n" x
   | NonTail(a), CallCls(x, ys, zs) ->
@@ -282,6 +311,7 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
       if x = "min_caml_sqrt" then Printf.fprintf oc "\tsqrt\t$f0, $f0\n" else
       if x = "min_caml_floor" then Printf.fprintf oc "\tfloor\t$f0, $f0\n" else
       if x = "min_caml_int_of_float" then Printf.fprintf oc "\tftoi\t$a0, $f0\n" else
+      if x = "min_caml_truncate" then Printf.fprintf oc "\tftoi\t$a0, $f0\n" else
       if x = "min_caml_float_of_int" then Printf.fprintf oc "\titof\t$f0, $a0\n" else
        ( 
       let ss = stacksize () in
@@ -374,9 +404,9 @@ let f oc (Prog(data, fundefs, e)) =
   Printf.fprintf oc "\taddi\t$s1, $a0, 0\n";
   Printf.fprintf oc "\taddi\t$a0, $gp, 0\n";
   Printf.fprintf oc "create_float_array_loop:\n";
-  Printf.fprintf oc "\tbne\t$s1, $zero, create_flaot_array_cont\n";
+  Printf.fprintf oc "\tbne\t$s1, $zero, create_float_array_cont\n";
   Printf.fprintf oc "\tjr\t$ra\n";
-  Printf.fprintf oc "create_array_cont:\n";
+  Printf.fprintf oc "create_float_array_cont:\n";
   Printf.fprintf oc "\tswc1\t$f0, 0($gp)\n";
   Printf.fprintf oc "\taddi\t$s1, $s1, -1\n";
   Printf.fprintf oc "\taddi\t$gp, $gp, 4\n";

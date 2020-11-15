@@ -65,7 +65,7 @@ let rec ack x y k =
       else           ack (x - 1) (ack x (y - 1)) in
   print_int (ack 3 10) *)
 
-let rec ack2 x y k2 = k2
+(* let rec ack2 x y k2 = k2
   (
   let rec f a = a in
   let rec ack x y k =
@@ -76,4 +76,7 @@ let rec ack2 x y k2 = k2
     in ack x y f)
     in
     let rec pr r = print_int r
-    in ack2 3 10 pr
+    in ack2 3 10 pr *)
+
+(* prtint_int (-659048) *)
+print_float (-1.3)

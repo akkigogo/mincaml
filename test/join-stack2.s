@@ -56,44 +56,36 @@ minus:
 	sub.s	$f0, $fzero, $f0
 	jr	$ra
 f.9:
-	slti	$s0, $a0, 0
-	beq	$zero, $s0, bne_else.27
+	addi	$a0, $zero, 123
 	jr	$ra
-bne_else.27:
-	sw	$a0, 0($sp)
-	sw	$s7, 4($sp)
-	sw	$ra, 12($sp)
-	addi	$sp, $sp, 16
-	jal	min_caml_print_int
-	addi	$sp, $sp, -16
-	lw	$ra, 12($sp)
-	addi	$a0, $zero, 1
-	lw	$a1, 4($sp)
-	sw	$ra, 12($sp)
-	addi	$sp, $sp, 16
-	jal	min_caml_create_array
-	addi	$sp, $sp, -16
-	lw	$ra, 12($sp)
-	lw	$s7, 0($a0)
-	lw	$a0, 0($sp)
-	addi	$a0, $a0, -1
-	lw	$s6, 0($s7)
-	jr	$s6
+g.11:
+	addi	$a0, $zero, 456
+	jr	$ra
 _min_caml_start:
 	addi	$sp, $sp, 4096
 	addi	$gp, $gp, 8192
-	add	$s7, $gp, $zero
-	addi	$gp, $gp, 8
-	lahi	$a0, f.9
-	lalo	$a0, f.9
-	sw	$a0, 0($s7)
-	addi	$a0, $zero, 9
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	lw	$s6, 0($s7)
-	lahi	$ra, tmp.29
-	lalo	$ra, tmp.29
-	jr	$s6
-tmp.29:
+	jal	f.9
+	addi	$sp, $sp, -8
+	lw	$ra, 4($sp)
+	sw	$a0, 0($sp)
+	slti	$s0, $a0, 1
+	beq	$zero, $s0, bne_else.23
+	sw	$ra, 4($sp)
+	addi	$sp, $sp, 8
+	jal	g.11
+	addi	$sp, $sp, -8
+	lw	$ra, 4($sp)
+	lw	$a1, 0($sp)
+	add	$a0, $a0, $a1
+	j	bne_cont.24
+bne_else.23:
+bne_cont.24:
+	lw	$a1, 0($sp)
+	add	$a0, $a0, $a1
+	sw	$ra, 4($sp)
+	addi	$sp, $sp, 8
+	jal	min_caml_print_int
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
