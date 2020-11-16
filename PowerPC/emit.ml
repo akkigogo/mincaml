@@ -196,7 +196,7 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
       stackset := stackset_back;
       g oc (Tail, e1)
   | Tail, IfFLE(x, y, e1, e2) ->    (* ok *)
-      Printf.fprintf oc "\tc.lt.s\t%s, %s\n" (reg x) (reg y);
+      Printf.fprintf oc "\tc.lt.s\t$s0, %s, %s\n" (reg x) (reg y);
       g'_tail_if oc e1 e2 "bne" "beq"
 (* Nontailのifってのは let y = if x < 2 then...的な結果を入れる系のやつ *)
   | NonTail(z), IfEq(x, V(y), e1, e2) -> (* ok *)
@@ -327,7 +327,7 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
       (* Printf.fprintf oc "\tmtlr\t%s\n" (reg reg_tmp) *)
 and g'_tail_if oc e1 e2 b bn =   (*本質的に命令に関係するのはbnのみ*)
   let b_else = Id.genid (b ^ "_else") in
-  Printf.fprintf oc "\t%s\t$zero, $s0, %s\n" bn b_else;
+  Printf.fprintf oc "\t%s\t$s0, $zero, %s\n" bn b_else;
   let stackset_back = !stackset in
   g oc (Tail, e1);
   Printf.fprintf oc "%s:\n" b_else;
@@ -336,7 +336,7 @@ and g'_tail_if oc e1 e2 b bn =   (*本質的に命令に関係するのはbnの�
 and g'_non_tail_if oc dest e1 e2 b bn =
   let b_else = Id.genid (b ^ "_else") in
   let b_cont = Id.genid (b ^ "_cont") in
-  Printf.fprintf oc "\t%s\t$zero, $s0, %s\n" bn b_else;
+  Printf.fprintf oc "\t%s\t$s0, $zero, %s\n" bn b_else;
   let stackset_back = !stackset in
   g oc (dest, e1);
   let stackset1 = !stackset in

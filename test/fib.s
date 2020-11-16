@@ -55,26 +55,49 @@ min_caml_abs_float:
 minus:
 	sub.s	$f0, $fzero, $f0
 	jr	$ra
-f.5:
-	lui	$s1, 16294
-	ori	$s1, $s1, 26214
+fib.10:
+	lui	$s1, 16256
+	ori	$s1, $s1, 0
 	mtc1	$s1, $f1
-	sub.s	$f0, $f0, $f1
+	c.lt.s	$s0, $f0, $f1
+	beq	$s0, $zero, bne_else.24
+	jr	$ra
+bne_else.24:
+	lui	$s1, 16256
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f1
+	sub.s	$f1, $f0, $f1
+	swc1	$f0, 0($sp)
+	add.s	$f0, $fzero, $f1
+	sw	$ra, 12($sp)
+	addi	$sp, $sp, 16
+	jal	fib.10
+	addi	$sp, $sp, -16
+	lw	$ra, 12($sp)
+	lui	$s1, 16384
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f1
+	lwc1	$f2, 0($sp)
+	sub.s	$f1, $f2, $f1
+	swc1	$f0, 8($sp)
+	add.s	$f0, $fzero, $f1
+	sw	$ra, 20($sp)
+	addi	$sp, $sp, 24
+	jal	fib.10
+	addi	$sp, $sp, -24
+	lw	$ra, 20($sp)
+	lwc1	$f1, 8($sp)
+	add.s	$f0, $f1, $f0
 	jr	$ra
 _min_caml_start:
 	addi	$sp, $sp, 4096
 	addi	$gp, $gp, 8192
-	lui	$s1, 16281
-	ori	$s1, $s1, 39322
+	lui	$s1, 16672
+	ori	$s1, $s1, 0
 	mtc1	$s1, $f0
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	jal	f.5
-	addi	$sp, $sp, -8
-	lw	$ra, 4($sp)
-	sw	$ra, 4($sp)
-	addi	$sp, $sp, 8
-	jal	f.5
+	jal	fib.10
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
 	sw	$ra, 4($sp)

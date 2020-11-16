@@ -79,4 +79,6 @@ let rec ack x y k =
     in ack2 3 10 pr *)
 
 (* prtint_int (-659048) *)
-print_float (-1.3)
+
+let rec f x = x -. 1.3 in print_float(f (f 1.2))
+
