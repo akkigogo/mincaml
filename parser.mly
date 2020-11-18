@@ -11,6 +11,8 @@ let addtyp x = (x, Type.gentyp ())
 %token NOT
 %token MINUS
 %token PLUS
+%token MULT
+%token DIV
 %token MINUS_DOT
 %token PLUS_DOT
 %token AST_DOT
@@ -38,7 +40,7 @@ let addtyp x = (x, Type.gentyp ())
 %token NEWLINE
 %token EOF
 
-/* (* ͥ���̤�associativity��������㤤������⤤���ء� (caml2html: parser_prior) *) */
+/* (* 優先順位とassociativityの定義（低い方から高い方へ (caml2html: parser_prior) *) */
 %nonassoc IN
 %right prec_let
 %right SEMICOLON
@@ -48,7 +50,7 @@ let addtyp x = (x, Type.gentyp ())
 %left COMMA
 %left EQUAL LESS_GREATER LESS GREATER LESS_EQUAL GREATER_EQUAL
 %left PLUS MINUS PLUS_DOT MINUS_DOT
-%left AST_DOT SLASH_DOT
+%left MULT DIV AST_DOT SLASH_DOT
 %right prec_unary_minus
 %left prec_app
 %left DOT
@@ -88,6 +90,10 @@ exp: /* (* ���̤μ� (caml2html: parser_exp) *) */
     { Add($1, $3) }
 | exp MINUS exp
     { Sub($1, $3) }
+| exp MULT exp
+    { Mult($1, $3) }
+| exp DIV exp
+    { Div($1, $3) }
 | exp EQUAL exp
     { Eq($1, $3) }
 | exp LESS_GREATER exp

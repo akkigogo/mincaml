@@ -9,6 +9,96 @@
 (*                                                              *)
 (****************************************************************)
 
+(* global 領域　*)
+
+let n_objects = create_array 1 0 in
+
+(* オブジェクトのデータを入れるベクトル（最大60個）*)
+let objects = 
+  let dummy = create_array 0 0.0 in
+  create_array 60 (0, 0, 0, 0, dummy, dummy, false, dummy, dummy, dummy, dummy) in
+
+(* Screen の中心座標 *)
+let screen = create_array 3 0.0 in
+(* 視点の座標 *)
+let viewpoint = create_array 3 0.0 in
+(* 光源方向ベクトル (単位ベクトル) *)
+let light = create_array 3 0.0 in
+(* 鏡面ハイライト強度 (標準=255) *)
+let beam = create_array 1 255.0 in 
+(* AND ネットワークを保持 *)
+let and_net = create_array 50 (create_array 1 (-1)) in 
+(* OR ネットワークを保持 *)
+let or_net = create_array 1 (create_array 1 (and_net.(0))) in
+
+(* 以下、交差判定ルーチンの返り値格納用 *)
+(* solver の交点 の t の値 *)
+let solver_dist = create_array 1 0.0 in
+(* 交点の直方体表面での方向 *)
+let intsec_rectside = create_array 1 0 in
+(* 発見した交点の最小の t *)
+let tmin = create_array 1 (1000000000.0) in 
+(* 交点の座標 *)
+let intersection_point = create_array 3 0.0 in
+(* 衝突したオブジェクト番号 *)
+let intersected_object_id = create_array 1 0 in
+(* 法線ベクトル *)
+let nvector = create_array 3 0.0 in
+(* 交点の色 *)
+let texture_color = create_array 3 0.0 in
+
+(* 計算中の間接受光強度を保持 *)
+let diffuse_ray = create_array 3 0.0 in
+(* スクリーン上の点の明るさ *)
+let rgb = create_array 3 0.0 in
+
+(* 画像サイズ *)
+let image_size = create_array 2 0 in
+(* 画像の中心 = 画像サイズの半分 *)
+let image_center = create_array 2 0 in
+(* 3次元上のピクセル間隔 *)
+let scan_pitch = create_array 1 0.0 in
+
+(* judge_intersectionに与える光線始点 *)
+let startp = create_array 3 0.0 in
+(* judge_intersection_fastに与える光線始点 *)
+let startp_fast = create_array 3 0.0 in
+
+(* 画面上のx,y,z軸の3次元空間上の方向 *)
+let screenx_dir = create_array 3 0.0 in
+let screeny_dir = create_array 3 0.0 in
+let screenz_dir = create_array 3 0.0 in
+
+(* 直接光追跡で使う光方向ベクトル *)
+let ptrace_dirvec  = create_array 3 0.0 in
+
+(* 間接光サンプリングに使う方向ベクトル *)
+let dirvecs = 
+  let dummyf = create_array 0 0.0 in
+  let dummyff = create_array 0 dummyf in
+  let dummy_vs = create_array 0 (dummyf, dummyff) in
+  create_array 5 dummy_vs in
+
+(* 光源光の前処理済み方向ベクトル *)
+let light_dirvec =
+  let dummyf2 = create_array 0 0.0 in
+  let v3 = create_array 3 0.0 in
+  let consts = create_array 60 dummyf2 in
+  (v3, consts) in
+
+(* 鏡平面の反射情報 *)
+let reflections =
+  let dummyf3 = create_array 0 0.0 in
+  let dummyff3 = create_array 0 dummyf3 in
+  let dummydv = (dummyf3, dummyff3) in
+  create_array 180 (0, dummydv, 0.0) in
+
+(* reflectionsの有効な要素数 *) 
+
+let n_reflections = create_array 1 0 in 
+
+(* globals.ml 領域 *)
+
 (*NOMINCAML open MiniMLRuntime;;*)
 (*NOMINCAML open Globals;;*)
 (* MINCAML let true = 1 in *)
@@ -54,6 +144,7 @@ let rec vecset v x y z =
   v.(2) <- z
 in
 
+ 
 (* 同じ値で埋める *)
 let rec vecfill v elem =
   v.(0) <- elem;
@@ -104,6 +195,7 @@ in
 let rec veciprod2 v w0 w1 w2 =
   v.(0) *. w0 +. v.(1) *. w1 +. v.(2) *. w2
 in
+
 
 (* 別なベクトルの定数倍を加算 *)
 let rec vecaccum dest scale v =
@@ -677,7 +769,7 @@ let rec read_all_object _ =
 in
 
 (**** AND, OR ネットワークの読み込み ****)
-
+(* 問題点 *)
 (* ネットワーク1つを読み込みベクトルにして返す *)
 let rec read_net_item length =
   let item = read_int () in
@@ -713,7 +805,7 @@ let rec read_parameter _ =
    read_and_network 0;
    or_net.(0) <- read_or_network 0
   )
-in
+in 
 
 (******************************************************************************
    直線とオブジェクトの交点を求める関数群
@@ -1342,7 +1434,6 @@ let rec trace_or_matrix ofs or_network dirvec =
     trace_or_matrix (ofs + 1) or_network dirvec
   )
 in
-
 (**** トレース本体 ****)
 (* トレース開始点 ViewPoint と、その点からのスキャン方向ベクトル *)
 (* Vscan から、交点 crashed_point と衝突したオブジェクト         *)
@@ -1401,7 +1492,6 @@ let rec solve_each_element_fast iand_ofs and_group dirvec =
        else ()
    )
 in
-
 (**** 1つの OR-group について交点を調べる ****)
 let rec solve_one_or_network_fast ofs or_group dirvec =
   let head = or_group.(ofs) in
@@ -1721,11 +1811,9 @@ let rec trace_ray nref energy dirvec pixel dist =
    ) else ()
 in
 
-
 (******************************************************************************
    間接光を追跡する
  *****************************************************************************)
-
 (* ある点が特定の方向から受ける間接光の強さを計算する *)
 (* 間接光の方向ベクトル dirvecに関しては定数テーブルが作られており、衝突判定
    が高速に行われる。物体に当たったら、その後の反射は追跡しない *)
@@ -2307,4 +2395,4 @@ in
 
 let _ = rt 512 512
 
-in 0
+in 0    

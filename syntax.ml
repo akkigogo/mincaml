@@ -7,6 +7,8 @@ type t = (* MinCaml�ι�ʸ��ɽ������ǡ����� (caml2h
   | Neg of t
   | Add of t * t
   | Sub of t * t
+  | Mult of t * t
+  | Div of t * t
   | FNeg of t
   | FAdd of t * t
   | FSub of t * t

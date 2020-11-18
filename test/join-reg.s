@@ -14,9 +14,9 @@ min_caml_create_float_array:
 	addi	$s1, $a0, 0
 	addi	$a0, $gp, 0
 create_float_array_loop:
-	bne	$s1, $zero, create_flaot_array_cont
+	bne	$s1, $zero, create_float_array_cont
 	jr	$ra
-create_array_cont:
+create_float_array_cont:
 	swc1	$f0, 0($gp)
 	addi	$s1, $s1, -1
 	addi	$gp, $gp, 4

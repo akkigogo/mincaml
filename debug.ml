@@ -24,6 +24,8 @@ let rec out_parser_tuple oc t1 = match t1 with
   | Neg e1 ->  Printf.fprintf oc ("(NEG "); out_parser oc e1; Printf.fprintf oc (")")
   | Add (e1, e2) ->  Printf.fprintf oc ("(ADD "); out_parser oc e1; out_parser oc e2; Printf.fprintf oc (")")
   | Sub (e1, e2) ->  Printf.fprintf oc ("(SUB "); out_parser oc e1; out_parser oc e2; Printf.fprintf oc (")")
+  | Mult (e1, e2) ->  Printf.fprintf oc ("(Mult "); out_parser oc e1; out_parser oc e2; Printf.fprintf oc (")")
+  | Div (e1, e2) ->  Printf.fprintf oc ("(Div "); out_parser oc e1; out_parser oc e2; Printf.fprintf oc (")")
   | FNeg e1 ->  Printf.fprintf oc ("(FNEG "); out_parser oc e1; Printf.fprintf oc (")")
   | FAdd (e1, e2) ->  Printf.fprintf oc ("(FADD "); out_parser oc e1; out_parser oc e2; Printf.fprintf oc (")")
   | FSub (e1, e2) ->  Printf.fprintf oc ("(FSUB "); out_parser oc e1; out_parser oc e2; Printf.fprintf oc (")")
@@ -63,6 +65,8 @@ let rec out_knormal oc exp = match exp with
   | Neg e1 ->  Printf.fprintf oc ("(NEG %s)") e1
   | Add (e1, e2) ->  Printf.fprintf oc ("(ADD %s %s)") e1 e2
   | Sub (e1, e2) ->  Printf.fprintf oc ("(SUB %s %s)") e1 e2
+  | Mult (e1, e2) ->  Printf.fprintf oc ("(MULT %s %s)") e1 e2
+  | Div (e1, e2) ->  Printf.fprintf oc ("(DIV %s %s)") e1 e2
   | FNeg e1 ->  Printf.fprintf oc ("(FNEG %s)") e1 
   | FAdd (e1, e2) ->  Printf.fprintf oc ("(FADD %s %s)") e1 e2
   | FSub (e1, e2) ->  Printf.fprintf oc ("(FSUB %s %s)") e1 e2
@@ -144,6 +148,8 @@ let rec out_closure1 oc exp = match exp with
     | Neg e1 ->  Printf.fprintf oc ("(NEG %s)") e1 
     | Add (e1, e2) ->  Printf.fprintf oc ("(ADD %s %s)") e1 e2 
     | Sub (e1, e2) ->  Printf.fprintf oc ("(SUB %s %s)") e1 e2 
+    | Mult (e1, e2) ->  Printf.fprintf oc ("(MULT %s %s)") e1 e2 
+    | Div (e1, e2) ->  Printf.fprintf oc ("(DIV %s %s)") e1 e2 
     | FNeg e1 ->  Printf.fprintf oc ("(FNEG %s)") e1 
     | FAdd (e1, e2) ->  Printf.fprintf oc ("(FADD %s %s)") e1 e2 
     | FSub (e1, e2) ->  Printf.fprintf oc ("(FSUB %s %s)") e1 e2 

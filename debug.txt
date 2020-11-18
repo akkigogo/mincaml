@@ -1,0 +1,46 @@
+Syntax
+
+(LETREC f Tu1 (INT 123)(LETREC g Tu2 (INT 456)(LETREC h Tu3 (INT 789)(LET x (APP (VAR f)(UNIT))(LET y (APP (VAR g)(UNIT))(APP (VAR print_int)(ADD (ADD (IF (EQ (APP (VAR h)(UNIT))(INT 0))(SUB (VAR x)(VAR y))(SUB (VAR y)(VAR x)))(VAR x))(VAR y))))))))
+KNormal
+
+(LETREC f Tu1 (INT 123)(LETREC g Tu2 (INT 456)(LETREC h Tu3 (INT 789)(LET x (LET Tu4 (UNIT)(APP f)Tu4))(LET y (LET Tu5 (UNIT)(APP g)Tu5))(LET Ti11 (LET Ti10 (LET Ti9 (LET Ti7 (LET Tu6 (UNIT)(APP h)Tu6))(LET Ti8 (INT 0)(IFEQ Ti7 Ti8(SUB x y)(SUB y x)))(ADD Ti9 x))(ADD Ti10 y))(EXTFUNAPP print_int Ti11)))))))
+Alpha
+
+(LETREC f.12 Tu1.13 (INT 123)(LETREC g.14 Tu2.15 (INT 456)(LETREC h.16 Tu3.17 (INT 789)(LET x.18 (LET Tu4.27 (UNIT)(APP f.12)Tu4.27))(LET y.19 (LET Tu5.26 (UNIT)(APP g.14)Tu5.26))(LET Ti11.20 (LET Ti10.21 (LET Ti9.22 (LET Ti7.23 (LET Tu6.25 (UNIT)(APP h.16)Tu6.25))(LET Ti8.24 (INT 0)(IFEQ Ti7.23 Ti8.24(SUB x.18 y.19)(SUB y.19 x.18)))(ADD Ti9.22 x.18))(ADD Ti10.21 y.19))(EXTFUNAPP print_int Ti11.20)))))))
+after Commondelete
+
+(LETREC f.12 Tu1.13 (INT 123)(LETREC g.14 Tu2.15 (INT 456)(LETREC h.16 Tu3.17 (INT 789)(LET x.18 (LET Tu4.27 (UNIT)(APP f.12)Tu4.27))(LET y.19 (LET Tu5.26 (UNIT)(APP g.14)Tu5.26))(LET Ti11.20 (LET Ti10.21 (LET Ti9.22 (LET Ti7.23 (LET Tu6.25 (UNIT)(APP h.16)Tu6.25))(LET Ti8.24 (INT 0)(IFEQ Ti7.23 Ti8.24(SUB x.18 y.19)(SUB y.19 x.18)))(ADD Ti9.22 x.18))(ADD Ti10.21 y.19))(EXTFUNAPP print_int Ti11.20)))))))
+after closure
+
+f.12  args: Tu1.13  fv:  body: (INT 123)
+g.14  args: Tu2.15  fv:  body: (INT 456)
+h.16  args: Tu3.17  fv:  body: (INT 789)
+
+(LET Tu4.27 (UNIT)
+(LET x.18 (AppDir f.12 Tu4.27)
+(LET Tu5.26 (UNIT)
+(LET y.19 (AppDir g.14 Tu5.26)
+(LET Tu6.25 (UNIT)
+(LET Ti7.23 (AppDir h.16 Tu6.25)
+(LET Ti8.24 (INT 0)
+(LET Ti9.22 (IFEQ Ti7.23 Ti8.24(SUB x.18 y.19)(SUB y.19 x.18)
+(LET Ti10.21 (ADD Ti9.22 x.18)
+(LET Ti11.20 (ADD Ti10.21 y.19)
+(AppDir min_caml_print_int Ti11.20)
+after tuple_flattening
+
+f.12  args: Tu1.13  fv:  body: (INT 123)
+g.14  args: Tu2.15  fv:  body: (INT 456)
+h.16  args: Tu3.17  fv:  body: (INT 789)
+
+(LET Tu4.27 (UNIT)
+(LET x.18 (AppDir f.12 Tu4.27)
+(LET Tu5.26 (UNIT)
+(LET y.19 (AppDir g.14 Tu5.26)
+(LET Tu6.25 (UNIT)
+(LET Ti7.23 (AppDir h.16 Tu6.25)
+(LET Ti8.24 (INT 0)
+(LET Ti9.22 (IFEQ Ti7.23 Ti8.24(SUB x.18 y.19)(SUB y.19 x.18)
+(LET Ti10.21 (ADD Ti9.22 x.18)
+(LET Ti11.20 (ADD Ti10.21 y.19)
+(AppDir min_caml_print_int Ti11.20)

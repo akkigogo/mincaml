@@ -27,6 +27,8 @@ let rec deref_term = function
   | Neg(e) -> Neg(deref_term e)
   | Add(e1, e2) -> Add(deref_term e1, deref_term e2)
   | Sub(e1, e2) -> Sub(deref_term e1, deref_term e2)
+  | Mult(e1, e2) -> Mult(deref_term e1, deref_term e2)
+  | Div(e1, e2) -> Div(deref_term e1, deref_term e2)
   | Eq(e1, e2) -> Eq(deref_term e1, deref_term e2)
   | LE(e1, e2) -> LE(deref_term e1, deref_term e2)
   | FNeg(e) -> FNeg(deref_term e)
@@ -39,7 +41,7 @@ let rec deref_term = function
   | LetRec({ name = xt; args = yts; body = e1 }, e2) ->
       LetRec({ name = deref_id_typ xt;
                args = List.map deref_id_typ yts;
-               body = deref_term e1 },
+               body = deref_term e1 }, 
              deref_term e2)
   | App(e, es) -> App(deref_term e, List.map deref_term es)
   | Tuple(es) -> Tuple(List.map deref_term es)
@@ -93,7 +95,7 @@ let rec g env e = (* 型推論(caml2html: typing_g) *)
     | Neg(e) ->
         unify Type.Int (g env e);
         Type.Int
-    | Add(e1, e2) | Sub(e1, e2) -> (* ­�����ʤȰ������ˤη����� (caml2html: typing_add) *)
+    | Add(e1, e2) | Sub(e1, e2) | Mult(e1, e2) | Div(e1, e2) -> (* ­�����ʤȰ������ˤη����� (caml2html: typing_add) *)
         unify Type.Int (g env e1);
         unify Type.Int (g env e2);
         Type.Int
@@ -148,16 +150,20 @@ let rec g env e = (* 型推論(caml2html: typing_g) *)
         unify (Type.Array(t)) (g env e1);
         unify Type.Int (g env e2);
         Type.Unit
-  with Unify(t1, t2) -> raise (Error(deref_term e, deref_typ t1, deref_typ t2))
+  with Unify(t1, t2) ->
+  print_string (Type.str t1);
+  print_string (Type.str t2);
+  print_string ("\n");
+  raise (Error(deref_term e, deref_typ t1, deref_typ t2))
 
 let f e =
   extenv := M.empty;
-(*
-  (match deref_typ (g M.empty e) with
+
+  (* (match deref_typ (g M.empty e) with
   | Type.Unit -> ()
-  | _ -> Format.eprintf "warning: final result does not have type unit@.");
-*)
+  | _ -> Format.eprintf "warning: final result does not have type unit@."); *)
+
   (try unify Type.Unit (g M.empty e)
-  with Unify _ -> failwith "top level does not have type unit");
+  with Unify _ -> ());
   extenv := M.map deref_typ !extenv;
   deref_term e

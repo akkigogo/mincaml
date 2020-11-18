@@ -80,5 +80,13 @@ let rec ack x y k =
 
 (* prtint_int (-659048) *)
 
-let rec f x = x -. 1.3 in print_float(f (f 1.2))
+(* let rec f x = x -. 1.3 in print_float(f (f 1.2)) *)
+
+(* let rec read_net_item length =
+  let item = read_int () in
+  if item = -1 then create_array (length + 1) (-1)
+  else
+    let v = read_net_item (length + 1) in
+    (v.(length) <- item; v)
+in  *)
 
