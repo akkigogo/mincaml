@@ -54,7 +54,7 @@ let regs = (* Array.init 27 (fun i -> Printf.sprintf "_R_%d" i) *)
      "%$t3"; "%$t4"; "%$t5"; "%$t6"; "%$t7"; "%$t8"; "%$t9"; "%$k0";
      "%$k1"; "%$v0"; "%$v1"; "%$at"; "%$s2"; "%$s3";
      "%$s4"; "$s5"; "%$s6"; "$s7" |]
-let fregs = Array.init 32 (fun i -> Printf.sprintf "%%$f%d" i)  (* 浮動小数点レジスタ *)
+let fregs = Array.init 31 (fun i -> Printf.sprintf "%%$f%d" i)  (* 浮動小数点レジスタ *)
 let allregs = Array.to_list regs
 let allfregs = Array.to_list fregs
 let reg_cl = regs.(Array.length regs - 1) (* closure address (caml2html: sparcasm_regcl) *)

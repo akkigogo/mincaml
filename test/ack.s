@@ -314,48 +314,37 @@ min_caml_fabs:
 minus:
 	sub.s	$f0, $fzero, $f0
 	jr	$ra
-fib.9:
-	lui	$s1, 16256
-	ori	$s1, $s1, 0
-	mtc1	$s1, $f1
-	c.lt.s	$s0, $f1, $f0
-	beq	$s0, $zero, bne_else.22
-	lui	$s1, 16281
-	ori	$s1, $s1, 39322
-	mtc1	$s1, $f1
-	sub.s	$f1, $f0, $f1
-	swc1	$f0, 0($sp)
-	add.s	$f0, $fzero, $f1
-	sw	$ra, 12($sp)
-	addi	$sp, $sp, 16
-	jal	fib.9
-	addi	$sp, $sp, -16
-	lw	$ra, 12($sp)
-	lui	$s1, 16403
-	ori	$s1, $s1, 13107
-	mtc1	$s1, $f1
-	lwc1	$f2, 0($sp)
-	sub.s	$f1, $f2, $f1
-	swc1	$f0, 8($sp)
-	add.s	$f0, $fzero, $f1
-	sw	$ra, 20($sp)
-	addi	$sp, $sp, 24
-	jal	fib.9
-	addi	$sp, $sp, -24
-	lw	$ra, 20($sp)
-	lwc1	$f1, 8($sp)
-	add.s	$f0, $f1, $f0
+ack.15:
+	slti	$s0, $a0, 1
+	beq	$s0, $zero, bne_else.34
+	addi	$a0, $a1, 1
 	jr	$ra
-bne_else.22:
-	jr	$ra
+bne_else.34:
+	slti	$s0, $a1, 1
+	beq	$s0, $zero, bne_else.35
+	addi	$a0, $a0, -1
+	addi	$a1, $zero, 1
+	j	ack.15
+bne_else.35:
+	addi	$a2, $a0, -1
+	addi	$a1, $a1, -1
+	sw	$a2, 0($sp)
+	sw	$ra, 4($sp)
+	addi	$sp, $sp, 8
+	jal	ack.15
+	addi	$sp, $sp, -8
+	lw	$ra, 4($sp)
+	add	$a1, $a0, $zero
+	lw	$a0, 0($sp)
+	j	ack.15
 _min_caml_start:
 	addi	$sp, $sp, 16384
 	addi	$gp, $gp, 32000
-	lui	$s1, 16673
-	ori	$s1, $s1, 39322
-	mtc1	$s1, $f0
+	addi	$a0, $zero, 3
+	addi	$a1, $zero, 2
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	jal	fib.9
+	jal	ack.15
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
+	outi	$a0

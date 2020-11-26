@@ -82,6 +82,8 @@ rule token = parse
     { ARRAY_CREATE }
 | "Array.create" | "Array.make" (* [XX] ad hoc *)
     { ARRAY_CREATE }
+| "fneg"
+    { MINUS_DOT } 
 | '.'
     { DOT }
 | "<-"

@@ -37,4 +37,4 @@ print_newline ();
 print_int (truncate (c.(1).(0)));
 print_newline ();
 print_int (truncate (c.(1).(1)));
-print_newline ()
+print_newline ()   

@@ -90,3 +90,34 @@ let rec ack x y k =
     (v.(length) <- item; v)
 in  *)
 
+(* let pi = 3.14159265 in
+let rec kernel_sin x =
+  x -. 0.16666668 *. x *. x *. x +. 0.008332824 *. x *. x *. x *. x *. x -. 0.0001958784 *. x *. x *. x *. x *. x *. x *. x in
+let rec kernel_cos y =
+  1.0 -. 0.5 *. y *. y +. 0.04166368 *. y *. y *. y *. y -. 0.001369506 *. y *. y *. y *. y *. y *. y in
+let rec sin x =
+  if x >= pi then -.(sin (x -. pi)) else 
+  if x >= pi *. 0.5 then sin (pi -. x) else
+  if x <= pi *. 0.25 then kernel_sin (x) else
+  kernel_cos (pi *. 0.5 -. x) in
+let rec cos y =
+  if y >= pi then -.(cos (y -. pi)) else 
+  if y >= pi *. 0.5 then -.(cos (pi -. y)) else
+  if y <= pi *. 0.25 then kernel_cos (y) else
+  kernel_sin (pi *. 0.5 -. y)
+in cos 1. +. sin 2. *)
+
+(* pr (3.1415926535) *)
+(* let pi = 3.1415926535 in
+let rec kernel_atan x = x -. 0.333333 *. x *. x *. x +. 0.2 *. x *. x *. x *. x *. x -. 0.142857142 *. x *. x *. x *. x *. x *. x *. x
+  +.  0.111111104 *. x *. x *. x *. x *. x *. x *. x *. x *. x -. 0.08976446 *. x *. x *. x *. x *. x *. x *. x *. x *. x *. x *. x
+  +. 0.060035485 *. x *. x *. x *. x *. x *. x *. x *. x *. x *. x *. x *. x *. x in
+let rec min_caml_atan y = 
+  if y < 0. then -.(min_caml_atan (-.y)) else
+  if y < 0.4375 then kernel_atan y else
+  if y < 2.4375 then pi *. 0.25 +. kernel_atan ((y -. 1.0) /. (y +. 1.0)) else
+  pi *. 0.5 -. kernel_atan (1. /. y) 
+in min_caml_atan 1.0 *)
+
+
+print_int 2

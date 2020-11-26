@@ -59,7 +59,7 @@ let addtyp x = (x, Type.gentyp ())
 %type <Syntax.t> exp
 %start exp
 %%
-simple_exp: /* (* ��̤�Ĥ��ʤ��Ƥ�ؿ��ΰ����ˤʤ�뼰 (caml2html: parser_simple) *) */
+simple_exp: /* (*  括弧をつけなくても関数の引数になれる式 (caml2html: parser_simple) *) */
 | LPAREN exp RPAREN
     { $2 }
 | LPAREN RPAREN
