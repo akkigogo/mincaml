@@ -4,3 +4,5 @@ let rec inprod v1 v2 i =
 let v1 = Array.make 3 1.23 in
 let v2 = Array.make 3 4.56 in
 print_int (truncate (1000000. *. inprod v1 v2 2))
+
+(* ok *)

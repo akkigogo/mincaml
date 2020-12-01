@@ -305,14 +305,61 @@ min_caml_fabs:
 minus:
 	sub.s	$f0, $fzero, $f0
 	jr	$ra
+inprod.18:
+	slti	$s0, $a2, 0
+	beq	$s0, $zero, bne_else.47
+	jr	$ra
+bne_else.47:
+	sll	$a3, $a2, 3
+	add	$s1, $a0, $f1
+	lwc1	$f1, 0($s1)
+	sll	$a3, $a2, 3
+	add	$s1, $a1, $f2
+	lwc1	$f2, 0($s1)
+	mul.s	$f1, $f1, $f2
+	add.s	$f0, $f0, $f1
+	addi	$a2, $a2, -1
+	j	inprod.18
 _min_caml_start:
 	addi	$sp, $sp, 16384
 	addi	$gp, $gp, 32000
-	lui	$s1, 16256
-	ori	$s1, $s1, 0
+	addi	$a0, $zero, 3
+	lui	$s1, 16285
+	ori	$s1, $s1, 28836
 	mtc1	$s1, $f0
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	jal	min_caml_atan
+	jal	min_caml_create_float_array
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
+	addi	$a1, $zero, 3
+	lui	$s1, 16529
+	ori	$s1, $s1, 60293
+	mtc1	$s1, $f0
+	sw	$a0, 0($sp)
+	add	$a0, $zero, $a1
+	sw	$ra, 4($sp)
+	addi	$sp, $sp, 8
+	jal	min_caml_create_float_array
+	addi	$sp, $sp, -8
+	lw	$ra, 4($sp)
+	add	$a1, $a0, $zero
+	lui	$s1, 18804
+	ori	$s1, $s1, 9216
+	mtc1	$s1, $f0
+	lui	$s1, 0
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f1
+	addi	$a2, $zero, 2
+	lw	$a0, 0($sp)
+	swc1	$f0, 8($sp)
+	add.s	$f0, $fzero, $f1
+	sw	$ra, 20($sp)
+	addi	$sp, $sp, 24
+	jal	inprod.18
+	addi	$sp, $sp, -24
+	lw	$ra, 20($sp)
+	lwc1	$f1, 8($sp)
+	mul.s	$f0, $f1, $f0
+	ftoi	$a0, $f0
+	outi	$a0

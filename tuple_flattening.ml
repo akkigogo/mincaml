@@ -76,7 +76,7 @@ and type4 = Appd
 let rec is_tuple exp = match exp with
   | Tuple _ -> true
   | IfEq (_, _, e1, e2) -> is_tuple e1
-  | IfLE (_, _, e1, e2) -> is_tuple e1
+  | IfLT (_, _, e1, e2) -> is_tuple e1
   | Let ((i1, ty1), e1, e2) -> is_tuple e2
   | LetTuple (l1, i1, e1) -> is_tuple e1                        (* if のなかでletがあることがある。*)
   | _ ->  false
@@ -91,7 +91,7 @@ let rec sub_open_tuple l1 t1 e = match l1 with
 let rec open_LetTuple l1 tu1 e = match tu1 with
   | Tuple t1 -> sub_open_tuple l1 t1 e
   | IfEq (i1, i2, e1, e2) -> IfEq (i1, i2, (open_LetTuple l1 e1 e), (open_LetTuple l1 e2 e))
-  | IfLE (i1, i2, e1, e2) -> IfLE (i1, i2, (open_LetTuple l1 e1 e), (open_LetTuple l1 e2 e))
+  | IfLT (i1, i2, e1, e2) -> IfLT (i1, i2, (open_LetTuple l1 e1 e), (open_LetTuple l1 e2 e))
   | Let ((i1, ty1), e1, e2) -> Let ((i1, ty1), e1, open_LetTuple l1 e2 e)
   | _ -> tu1   (* 関数の返り値などに対してはやらない *)
   
@@ -106,7 +106,7 @@ let rec assoc i tenv2 = match tenv2 with
   
 let rec g tenv1 tenv2 exp = match exp with
   | IfEq (i1, i2, e1, e2) -> IfEq (i1, i2, (g tenv1 tenv2 e1), (g tenv1 tenv2 e2))
-  | IfLE (i1, i2, e1, e2) -> IfLE (i1, i2, (g tenv1 tenv2 e1), (g tenv1 tenv2 e2))
+  | IfLT (i1, i2, e1, e2) -> IfLT (i1, i2, (g tenv1 tenv2 e1), (g tenv1 tenv2 e2))
   | Let ((i1, ty1), e1, e2) ->
     (match e1 with
       | Tuple t1 ->

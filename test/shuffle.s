@@ -305,14 +305,45 @@ min_caml_fabs:
 minus:
 	sub.s	$f0, $fzero, $f0
 	jr	$ra
+foo.12:
+	sw	$t1, 0($sp)
+	sw	$t0, 4($sp)
+	sw	$a3, 8($sp)
+	sw	$a2, 12($sp)
+	sw	$a1, 16($sp)
+	outi	$a0
+	lw	$a0, 16($sp)
+	outi	$a0
+	lw	$a0, 12($sp)
+	outi	$a0
+	lw	$a0, 8($sp)
+	outi	$a0
+	lw	$a0, 4($sp)
+	outi	$a0
+	lw	$a0, 0($sp)
+	outi	$a0
+	jr	$ra
+bar.19:
+	add	$s6, $zero, $t1
+	add	$t1, $zero, $a2
+	add	$a2, $zero, $a3
+	add	$a3, $zero, $t0
+	add	$t0, $zero, $s6
+	add	$s6, $zero, $a1
+	add	$a1, $zero, $a0
+	add	$a0, $zero, $s6
+	j	foo.12
 _min_caml_start:
 	addi	$sp, $sp, 16384
 	addi	$gp, $gp, 32000
-	lui	$s1, 16256
-	ori	$s1, $s1, 0
-	mtc1	$s1, $f0
+	addi	$a0, $zero, 1
+	addi	$a1, $zero, 2
+	addi	$a2, $zero, 3
+	addi	$a3, $zero, 4
+	addi	$t0, $zero, 5
+	addi	$t1, $zero, 6
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	jal	min_caml_atan
+	jal	bar.19
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)

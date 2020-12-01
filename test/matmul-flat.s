@@ -305,14 +305,281 @@ min_caml_fabs:
 minus:
 	sub.s	$f0, $fzero, $f0
 	jr	$ra
+loop3.138:
+	slti	$s0, $a1, 0
+	beq	$s0, $zero, bne_else.389
+	jr	$ra
+bne_else.389:
+	sll	$t2, $a0, 2
+	add	$s1, $t1, $t2
+	lw	$t2, 0($s1)
+	sll	$t3, $a0, 2
+	add	$s1, $t1, $t3
+	lw	$t3, 0($s1)
+	sll	$t4, $a2, 2
+	add	$s1, $t3, $t4
+	lwc1	$f0, 0($s1)
+	sll	$t3, $a0, 2
+	add	$s1, $a3, $t3
+	lw	$t3, 0($s1)
+	sll	$t4, $a1, 2
+	add	$s1, $t3, $t4
+	lwc1	$f1, 0($s1)
+	sll	$t3, $a1, 2
+	add	$s1, $t0, $t3
+	lw	$t3, 0($s1)
+	sll	$t4, $a2, 2
+	add	$s1, $t3, $t4
+	lwc1	$f2, 0($s1)
+	mul.s	$f1, $f1, $f2
+	add.s	$f0, $f0, $f1
+	sll	$t3, $a2, 2
+	add	$s1, $t2, $t3
+	swc1	$f0, 0($s1)
+	addi	$a1, $a1, -1
+	j	loop3.138
+loop2.145:
+	slti	$s0, $a2, 0
+	beq	$s0, $zero, bne_else.391
+	jr	$ra
+bne_else.391:
+	addi	$t2, $a1, -1
+	sw	$t1, 0($sp)
+	sw	$t0, 4($sp)
+	sw	$a3, 8($sp)
+	sw	$a1, 12($sp)
+	sw	$a0, 16($sp)
+	sw	$a2, 20($sp)
+	add	$a1, $zero, $t2
+	sw	$ra, 28($sp)
+	addi	$sp, $sp, 32
+	jal	loop3.138
+	addi	$sp, $sp, -32
+	lw	$ra, 28($sp)
+	lw	$a0, 20($sp)
+	addi	$a2, $a0, -1
+	lw	$a0, 16($sp)
+	lw	$a1, 12($sp)
+	lw	$a3, 8($sp)
+	lw	$t0, 4($sp)
+	lw	$t1, 0($sp)
+	j	loop2.145
+loop1.152:
+	slti	$s0, $a0, 0
+	beq	$s0, $zero, bne_else.393
+	jr	$ra
+bne_else.393:
+	addi	$t2, $a2, -1
+	sw	$t1, 0($sp)
+	sw	$t0, 4($sp)
+	sw	$a3, 8($sp)
+	sw	$a2, 12($sp)
+	sw	$a1, 16($sp)
+	sw	$a0, 20($sp)
+	add	$a2, $zero, $t2
+	sw	$ra, 28($sp)
+	addi	$sp, $sp, 32
+	jal	loop2.145
+	addi	$sp, $sp, -32
+	lw	$ra, 28($sp)
+	lw	$a0, 20($sp)
+	addi	$a0, $a0, -1
+	lw	$a1, 16($sp)
+	lw	$a2, 12($sp)
+	lw	$a3, 8($sp)
+	lw	$t0, 4($sp)
+	lw	$t1, 0($sp)
+	j	loop1.152
+mul.159:
+	addi	$a0, $a0, -1
+	j	loop1.152
+init.167:
+	slti	$s0, $a0, 0
+	beq	$s0, $zero, bne_else.395
+	jr	$ra
+bne_else.395:
+	lui	$s1, 0
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	sw	$a1, 0($sp)
+	sw	$a2, 4($sp)
+	sw	$a0, 8($sp)
+	add	$a0, $zero, $a1
+	sw	$ra, 12($sp)
+	addi	$sp, $sp, 16
+	jal	min_caml_create_float_array
+	addi	$sp, $sp, -16
+	lw	$ra, 12($sp)
+	lw	$a1, 8($sp)
+	sll	$a2, $a1, 2
+	lw	$a3, 4($sp)
+	add	$s1, $a3, $a2
+	sw	$a0, 0($s1)
+	addi	$a0, $a1, -1
+	lw	$a1, 0($sp)
+	add	$a2, $zero, $a3
+	j	init.167
+make.171:
+	sw	$a1, 0($sp)
+	sw	$a0, 4($sp)
+	add	$a1, $zero, $a2
+	sw	$ra, 12($sp)
+	addi	$sp, $sp, 16
+	jal	min_caml_create_array
+	addi	$sp, $sp, -16
+	lw	$ra, 12($sp)
+	add	$a2, $a0, $zero
+	lw	$a0, 4($sp)
+	addi	$a0, $a0, -1
+	lw	$a1, 0($sp)
+	sw	$a2, 8($sp)
+	sw	$ra, 12($sp)
+	addi	$sp, $sp, 16
+	jal	init.167
+	addi	$sp, $sp, -16
+	lw	$ra, 12($sp)
+	lw	$a0, 8($sp)
+	jr	$ra
 _min_caml_start:
 	addi	$sp, $sp, 16384
 	addi	$gp, $gp, 32000
-	lui	$s1, 16256
+	addi	$a0, $zero, 0
+	lui	$s1, 0
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f0
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	jal	min_caml_atan
+	jal	min_caml_create_float_array
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
+	add	$a2, $a0, $zero
+	addi	$a0, $zero, 2
+	addi	$a1, $zero, 3
+	sw	$a2, 0($sp)
+	sw	$ra, 4($sp)
+	addi	$sp, $sp, 8
+	jal	make.171
+	addi	$sp, $sp, -8
+	lw	$ra, 4($sp)
+	addi	$a1, $zero, 3
+	addi	$a2, $zero, 2
+	lw	$a3, 0($sp)
+	sw	$a0, 4($sp)
+	add	$a0, $zero, $a1
+	add	$a1, $zero, $a2
+	add	$a2, $zero, $a3
+	sw	$ra, 12($sp)
+	addi	$sp, $sp, 16
+	jal	make.171
+	addi	$sp, $sp, -16
+	lw	$ra, 12($sp)
+	addi	$a1, $zero, 2
+	addi	$a2, $zero, 2
+	lw	$a3, 0($sp)
+	sw	$a0, 8($sp)
+	add	$a0, $zero, $a1
+	add	$a1, $zero, $a2
+	add	$a2, $zero, $a3
+	sw	$ra, 12($sp)
+	addi	$sp, $sp, 16
+	jal	make.171
+	addi	$sp, $sp, -16
+	lw	$ra, 12($sp)
+	add	$t1, $a0, $zero
+	lw	$a3, 4($sp)
+	lw	$a0, 0($a3)
+	lui	$s1, 16256
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	swc1	$f0, 0($a0)
+	lw	$a0, 0($a3)
+	lui	$s1, 16384
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	swc1	$f0, 4($a0)
+	lw	$a0, 0($a3)
+	lui	$s1, 16448
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	swc1	$f0, 8($a0)
+	lw	$a0, 4($a3)
+	lui	$s1, 16512
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	swc1	$f0, 0($a0)
+	lw	$a0, 4($a3)
+	lui	$s1, 16544
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	swc1	$f0, 4($a0)
+	lw	$a0, 4($a3)
+	lui	$s1, 16576
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	swc1	$f0, 8($a0)
+	lw	$t0, 8($sp)
+	lw	$a0, 0($t0)
+	lui	$s1, 16608
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	swc1	$f0, 0($a0)
+	lw	$a0, 0($t0)
+	lui	$s1, 16640
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	swc1	$f0, 4($a0)
+	lw	$a0, 4($t0)
+	lui	$s1, 16656
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	swc1	$f0, 0($a0)
+	lw	$a0, 4($t0)
+	lui	$s1, 16672
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	swc1	$f0, 4($a0)
+	lw	$a0, 8($t0)
+	lui	$s1, 16688
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	swc1	$f0, 0($a0)
+	lw	$a0, 8($t0)
+	lui	$s1, 16704
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	swc1	$f0, 4($a0)
+	addi	$a0, $zero, 2
+	addi	$a1, $zero, 3
+	addi	$a2, $zero, 2
+	sw	$t1, 12($sp)
+	sw	$ra, 20($sp)
+	addi	$sp, $sp, 24
+	jal	mul.159
+	addi	$sp, $sp, -24
+	lw	$ra, 20($sp)
+	lw	$a0, 12($sp)
+	lw	$a1, 0($a0)
+	lwc1	$f0, 0($a1)
+	ftoi	$a0, $f0
+	outi	$a0
+	addi	$a0, $zero, 10
+	outc	$a0
+	lw	$a0, 12($sp)
+	lw	$a1, 0($a0)
+	lwc1	$f0, 4($a1)
+	ftoi	$a0, $f0
+	outi	$a0
+	addi	$a0, $zero, 10
+	outc	$a0
+	lw	$a0, 12($sp)
+	lw	$a1, 4($a0)
+	lwc1	$f0, 0($a1)
+	ftoi	$a0, $f0
+	outi	$a0
+	addi	$a0, $zero, 10
+	outc	$a0
+	lw	$a0, 12($sp)
+	lw	$a0, 4($a0)
+	lwc1	$f0, 4($a0)
+	ftoi	$a0, $f0
+	outi	$a0

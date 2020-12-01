@@ -308,11 +308,43 @@ minus:
 _min_caml_start:
 	addi	$sp, $sp, 16384
 	addi	$gp, $gp, 32000
-	lui	$s1, 16256
-	ori	$s1, $s1, 0
+	lui	$s1, 16285
+	ori	$s1, $s1, 28836
 	mtc1	$s1, $f0
-	sw	$ra, 4($sp)
-	addi	$sp, $sp, 8
-	jal	min_caml_atan
-	addi	$sp, $sp, -8
-	lw	$ra, 4($sp)
+	ftoi	$a0, $f0
+	lui	$s1, 16529
+	ori	$s1, $s1, 60293
+	mtc1	$s1, $f0
+	sw	$a0, 0($sp)
+	ftoi	$a0, $f0
+	lui	$s1, -16132
+	ori	$s1, $s1, 31457
+	mtc1	$s1, $f0
+	sw	$a0, 4($sp)
+	ftoi	$a0, $f0
+	slti	$s0, $a0, 0
+	beq	$s0, $zero, bne_else.31
+	lw	$a1, 4($sp)
+	j	bne_cont.32
+bne_else.31:
+	lw	$a1, 0($sp)
+bne_cont.32:
+	addi	$a2, $zero, 0
+	lw	$a3, 0($sp)
+	slt	$s0, $a2, $a3
+	beq	$s0, $zero, bne_else.33
+	add	$a2, $a0, $zero
+	j	bne_cont.34
+bne_else.33:
+	lw	$a2, 4($sp)
+bne_cont.34:
+	add	$a1, $a1, $a2
+	lw	$a2, 4($sp)
+	slti	$s0, $a2, 0
+	beq	$s0, $zero, bne_else.35
+	add	$a0, $a3, $zero
+	j	bne_cont.36
+bne_else.35:
+bne_cont.36:
+	add	$a0, $a1, $a0
+	outi	$a0

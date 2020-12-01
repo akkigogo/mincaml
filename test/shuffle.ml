@@ -8,3 +8,5 @@ let rec foo a b c d e f =
 let rec bar a b c d e f =
   foo b a d e f c in
 bar 1 2 3 4 5 6
+
+(* ok *)

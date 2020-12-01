@@ -104,16 +104,14 @@ bne_else.sin_147:
 	j	kernel_sin
 bne_else.sin_146:
 	sub.s	$f0, $f1, $f0
-	lw	$s6, 0($s7)
-	jr	$s6
+	j	min_caml_sin
 	bne_else.sin_145:
 	sub.s	$f0, $f0, $f1
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	lw	$s6, 0($s7)
 	lahi	$ra, tmp.sin_148
 	lalo	$ra, tmp.sin_148
-	jr	$s6
+	j	min_caml_sin
 tmp.sin_148:
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
@@ -146,10 +144,9 @@ bne_else.cos_135:
 	sub.s	$f0, $f1, $f0
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	lw	$s6, 0($s7)
 	lahi	$ra, tmp.cos_137
 	lalo	$ra, tmp.cos_137
-	jr	$s6
+	j	min_caml_cos
 tmp.cos_137:
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
@@ -159,15 +156,9 @@ bne_else.cos_134:
 	sub.s	$f0, $f0, $f1
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	lw	$s6, 0($s7)
-	lahi	$ra, tmp.cos_138
-	lalo	$ra, tmp.cos_138
-	jr	$s6
-tmp.cos_138:
-	addi	$sp, $sp, -8
-	lw	$ra, 4($sp)
-	sub.s	$f0, $fzero, $f0
-	jr	$ra
+	lahi	$ra, tmp.cos_137
+	lalo	$ra, tmp.cos_137
+	j	min_caml_cos
 kernel_atan:
 	lui	$s1, 16042
 	ori	$s1, $s1, 43679

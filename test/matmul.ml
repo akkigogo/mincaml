@@ -31,10 +31,21 @@ b.(1).(0) <- 9.; b.(1).(1) <- 10.;
 b.(2).(0) <- 11.; b.(2).(1) <- 12.;
 mul 2 3 2 a b c;
 print_int (truncate (c.(0).(0)));
-print_newline ();
+(* print_newline(); *)
+print_char 10;
 print_int (truncate (c.(0).(1)));
-print_newline ();
+print_char 10;
+(* print_newline(); *)
 print_int (truncate (c.(1).(0)));
-print_newline ();
+print_char 10;
+(* print_newline(); *)
 print_int (truncate (c.(1).(1)));
-print_newline ()   
+(* print_char 10 *)
+
+
+(* ok *)
+(*
+58
+64
+139
+154 *)

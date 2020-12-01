@@ -305,14 +305,110 @@ min_caml_fabs:
 minus:
 	sub.s	$f0, $fzero, $f0
 	jr	$ra
+getx.23:
+	lwc1	$f0, 0($a0)
+	jr	$ra
+gety.25:
+	lwc1	$f0, 8($a0)
+	jr	$ra
+getz.27:
+	lwc1	$f0, 16($a0)
+	jr	$ra
+inprod.29:
+	sw	$a0, 0($sp)
+	sw	$a1, 4($sp)
+	sw	$ra, 12($sp)
+	addi	$sp, $sp, 16
+	jal	getx.23
+	addi	$sp, $sp, -16
+	lw	$ra, 12($sp)
+	lw	$a0, 4($sp)
+	swc1	$f0, 8($sp)
+	sw	$ra, 20($sp)
+	addi	$sp, $sp, 24
+	jal	getx.23
+	addi	$sp, $sp, -24
+	lw	$ra, 20($sp)
+	lwc1	$f1, 8($sp)
+	mul.s	$f0, $f1, $f0
+	lw	$a0, 0($sp)
+	swc1	$f0, 16($sp)
+	sw	$ra, 28($sp)
+	addi	$sp, $sp, 32
+	jal	gety.25
+	addi	$sp, $sp, -32
+	lw	$ra, 28($sp)
+	lw	$a0, 4($sp)
+	swc1	$f0, 24($sp)
+	sw	$ra, 36($sp)
+	addi	$sp, $sp, 40
+	jal	gety.25
+	addi	$sp, $sp, -40
+	lw	$ra, 36($sp)
+	lwc1	$f1, 24($sp)
+	mul.s	$f0, $f1, $f0
+	lwc1	$f1, 16($sp)
+	add.s	$f0, $f1, $f0
+	lw	$a0, 0($sp)
+	swc1	$f0, 32($sp)
+	sw	$ra, 44($sp)
+	addi	$sp, $sp, 48
+	jal	getz.27
+	addi	$sp, $sp, -48
+	lw	$ra, 44($sp)
+	lw	$a0, 4($sp)
+	swc1	$f0, 40($sp)
+	sw	$ra, 52($sp)
+	addi	$sp, $sp, 56
+	jal	getz.27
+	addi	$sp, $sp, -56
+	lw	$ra, 52($sp)
+	lwc1	$f1, 40($sp)
+	mul.s	$f0, $f1, $f0
+	lwc1	$f1, 32($sp)
+	add.s	$f0, $f1, $f0
+	jr	$ra
 _min_caml_start:
 	addi	$sp, $sp, 16384
 	addi	$gp, $gp, 32000
+	lui	$s1, 18804
+	ori	$s1, $s1, 9216
+	mtc1	$s1, $f0
 	lui	$s1, 16256
 	ori	$s1, $s1, 0
-	mtc1	$s1, $f0
-	sw	$ra, 4($sp)
-	addi	$sp, $sp, 8
-	jal	min_caml_atan
-	addi	$sp, $sp, -8
-	lw	$ra, 4($sp)
+	mtc1	$s1, $f1
+	lui	$s1, 16384
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f2
+	lui	$s1, 16448
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f3
+	add	$a0, $gp, $zero
+	addi	$gp, $gp, 24
+	swc1	$f3, 16($a0)
+	swc1	$f2, 8($a0)
+	swc1	$f1, 0($a0)
+	lui	$s1, 16512
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f1
+	lui	$s1, 16544
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f2
+	lui	$s1, 16576
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f3
+	add	$a1, $gp, $zero
+	addi	$gp, $gp, 24
+	swc1	$f3, 16($a1)
+	swc1	$f2, 8($a1)
+	swc1	$f1, 0($a1)
+	swc1	$f0, 0($sp)
+	sw	$ra, 12($sp)
+	addi	$sp, $sp, 16
+	jal	inprod.29
+	addi	$sp, $sp, -16
+	lw	$ra, 12($sp)
+	lwc1	$f1, 0($sp)
+	mul.s	$f0, $f1, $f0
+	ftoi	$a0, $f0
+	outi	$a0

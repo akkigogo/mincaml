@@ -110,7 +110,7 @@ let rec out_knormal oc exp = match exp with
     | FMul of Id.t * Id.t
     | FDiv of Id.t * Id.t
     | IfEq of Id.t * Id.t * t * t
-    | IfLE of Id.t * Id.t * t * t
+    | IfLT of Id.t * Id.t * t * t
     | Let of (Id.t * Type.t) * t * t
     | Var of Id.t
     | MakeCls of (Id.t * Type.t) * closure * t
@@ -156,7 +156,7 @@ let rec out_closure1 oc exp = match exp with
     | FMul (e1, e2) ->  Printf.fprintf oc ("(FMUL %s %s)") e1 e2 
     | FDiv (e1, e2) ->  Printf.fprintf oc ("(FDIV %s %s)") e1 e2 
     | IfEq (s1, s2, e1, e2) -> Printf.fprintf oc ("(IFEQ %s %s") s1 s2; out_closure1 oc e1; out_closure1 oc e2 
-    | IfLE (s1, s2, e1, e2) -> Printf.fprintf oc ("(IFLE %s %s") s1 s2; out_closure1 oc e1; out_closure1 oc e2 
+    | IfLT (s1, s2, e1, e2) -> Printf.fprintf oc ("(IFLT^ %s %s") s1 s2; out_closure1 oc e1; out_closure1 oc e2 
     | Let ((i1, t1), e1, e2) ->  Printf.fprintf oc ("(LET %s ") i1; out_closure1 oc e1; Printf.fprintf oc ("\n"); out_closure1 oc e2
     | Var e1 ->  Printf.fprintf oc ("(VAR %s)") e1
     | MakeCls ((i1, t1), c1, e1) -> Printf.fprintf oc ("(MakeCls %s ") i1; out_the_closure oc c1; out_closure1 oc e1

@@ -104,14 +104,16 @@ bne_else.sin_147:
 	j	kernel_sin
 bne_else.sin_146:
 	sub.s	$f0, $f1, $f0
-	j	min_caml_sin
+	lw	$s6, 0($s7)
+	jr	$s6
 	bne_else.sin_145:
 	sub.s	$f0, $f0, $f1
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
+	lw	$s6, 0($s7)
 	lahi	$ra, tmp.sin_148
 	lalo	$ra, tmp.sin_148
-	j	min_caml_sin
+	jr	$s6
 tmp.sin_148:
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
@@ -144,9 +146,10 @@ bne_else.cos_135:
 	sub.s	$f0, $f1, $f0
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
+	lw	$s6, 0($s7)
 	lahi	$ra, tmp.cos_137
 	lalo	$ra, tmp.cos_137
-	j	min_caml_cos
+	jr	$s6
 tmp.cos_137:
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
@@ -156,9 +159,15 @@ bne_else.cos_134:
 	sub.s	$f0, $f0, $f1
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	lahi	$ra, tmp.cos_137
-	lalo	$ra, tmp.cos_137
-	j	min_caml_cos
+	lw	$s6, 0($s7)
+	lahi	$ra, tmp.cos_138
+	lalo	$ra, tmp.cos_138
+	jr	$s6
+tmp.cos_138:
+	addi	$sp, $sp, -8
+	lw	$ra, 4($sp)
+	sub.s	$f0, $fzero, $f0
+	jr	$ra
 kernel_atan:
 	lui	$s1, 16042
 	ori	$s1, $s1, 43679
@@ -305,14 +314,132 @@ min_caml_fabs:
 minus:
 	sub.s	$f0, $fzero, $f0
 	jr	$ra
+dbl.38:
+	add.s	$f0, $f0, $f0
+	jr	$ra
+iloop.54:
+	bne	$a0, $zero, bne_else.112
+	addi	$a0, $zero, 1
+	outi	$a0
+	jr	$ra
+bne_else.112:
+	sub.s	$f2, $f2, $f3
+	add.s	$f2, $f2, $f4
+	swc1	$f4, 0($sp)
+	sw	$a0, 8($sp)
+	swc1	$f2, 16($sp)
+	swc1	$f5, 24($sp)
+	swc1	$f1, 32($sp)
+	sw	$ra, 44($sp)
+	addi	$sp, $sp, 48
+	jal	dbl.38
+	addi	$sp, $sp, -48
+	lw	$ra, 44($sp)
+	lwc1	$f1, 32($sp)
+	mul.s	$f0, $f0, $f1
+	lwc1	$f5, 24($sp)
+	add.s	$f1, $f0, $f5
+	lwc1	$f0, 16($sp)
+	mul.s	$f2, $f0, $f0
+	mul.s	$f3, $f1, $f1
+	add.s	$f4, $f2, $f3
+	lui	$s1, 16512
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f6
+	c.lt.s	$s0, $f6, $f4
+	beq	$s0, $zero, bne_else.114
+	addi	$a0, $zero, 0
+	outi	$a0
+	jr	$ra
+bne_else.114:
+	lw	$a0, 8($sp)
+	addi	$a0, $a0, -1
+	lwc1	$f4, 0($sp)
+	j	iloop.54
+xloop.44:
+	slti	$s0, $a0, 40
+	beq	$s0, $zero, bne_else.115
+	sw	$a0, 0($sp)
+	sw	$a1, 4($sp)
+	itof	$f0, $a0
+	sw	$ra, 12($sp)
+	addi	$sp, $sp, 16
+	jal	dbl.38
+	addi	$sp, $sp, -16
+	lw	$ra, 12($sp)
+	lui	$s1, 16928
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f1
+	div.s	$f0, $f0, $f1
+	lui	$s1, 16320
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f1
+	sub.s	$f0, $f0, $f1
+	lw	$a0, 4($sp)
+	swc1	$f0, 8($sp)
+	itof	$f0, $a0
+	sw	$ra, 20($sp)
+	addi	$sp, $sp, 24
+	jal	dbl.38
+	addi	$sp, $sp, -24
+	lw	$ra, 20($sp)
+	lui	$s1, 16928
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f1
+	div.s	$f0, $f0, $f1
+	lui	$s1, 16256
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f1
+	sub.s	$f5, $f0, $f1
+	addi	$a0, $zero, 1000
+	lui	$s1, 0
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f0
+	lui	$s1, 0
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f1
+	lui	$s1, 0
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f2
+	lui	$s1, 0
+	ori	$s1, $s1, 0
+	mtc1	$s1, $f3
+	lwc1	$f4, 8($sp)
+	sw	$ra, 20($sp)
+	addi	$sp, $sp, 24
+	jal	iloop.54
+	addi	$sp, $sp, -24
+	lw	$ra, 20($sp)
+	lw	$a0, 0($sp)
+	addi	$a0, $a0, 1
+	lw	$a1, 4($sp)
+	j	xloop.44
+bne_else.115:
+	jr	$ra
+yloop.40:
+	slti	$s0, $a0, 40
+	beq	$s0, $zero, bne_else.117
+	addi	$a1, $zero, 0
+	sw	$a0, 0($sp)
+	add	$s6, $zero, $a1
+	add	$a1, $zero, $a0
+	add	$a0, $zero, $s6
+	sw	$ra, 4($sp)
+	addi	$sp, $sp, 8
+	jal	xloop.44
+	addi	$sp, $sp, -8
+	lw	$ra, 4($sp)
+	lw	$a0, 0($sp)
+	addi	$a0, $a0, 1
+	j	yloop.40
+bne_else.117:
+	jr	$ra
 _min_caml_start:
 	addi	$sp, $sp, 16384
 	addi	$gp, $gp, 32000
-	lui	$s1, 16256
-	ori	$s1, $s1, 0
-	mtc1	$s1, $f0
+	addi	$a0, $zero, 0
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	jal	min_caml_atan
+	jal	yloop.40
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)

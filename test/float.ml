@@ -4,6 +4,8 @@
    MinCaml�ǤϾ����int -> int�ȿ�������뤿��ˡ� *)
 print_int
   (int_of_float
-     ((sin (cos (fsqr (fabs (-12.3))))
+     ((sin (cos (sqrt (12.3)))
          +. 4.5 -. 6.7 *. 8.9 /. 1.23456789)
         *. float_of_int 1000000))
+
+        (* ok *)

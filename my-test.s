@@ -308,7 +308,7 @@ minus:
 _min_caml_start:
 	addi	$sp, $sp, 16384
 	addi	$gp, $gp, 32000
-	lui	$s1, 16256
+	lui	$s1, 17096
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f0
 	sw	$ra, 4($sp)

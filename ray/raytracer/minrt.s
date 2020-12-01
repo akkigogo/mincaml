@@ -104,16 +104,14 @@ bne_else.sin_147:
 	j	kernel_sin
 bne_else.sin_146:
 	sub.s	$f0, $f1, $f0
-	lw	$s6, 0($s7)
-	jr	$s6
+	j	min_caml_sin
 	bne_else.sin_145:
 	sub.s	$f0, $f0, $f1
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	lw	$s6, 0($s7)
 	lahi	$ra, tmp.sin_148
 	lalo	$ra, tmp.sin_148
-	jr	$s6
+	j	min_caml_sin
 tmp.sin_148:
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
@@ -146,10 +144,9 @@ bne_else.cos_135:
 	sub.s	$f0, $f1, $f0
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	lw	$s6, 0($s7)
 	lahi	$ra, tmp.cos_137
 	lalo	$ra, tmp.cos_137
-	jr	$s6
+	j	min_caml_cos
 tmp.cos_137:
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
@@ -159,15 +156,9 @@ bne_else.cos_134:
 	sub.s	$f0, $f0, $f1
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	lw	$s6, 0($s7)
-	lahi	$ra, tmp.cos_138
-	lalo	$ra, tmp.cos_138
-	jr	$s6
-tmp.cos_138:
-	addi	$sp, $sp, -8
-	lw	$ra, 4($sp)
-	sub.s	$f0, $fzero, $f0
-	jr	$ra
+	lahi	$ra, tmp.cos_137
+	lalo	$ra, tmp.cos_137
+	j	min_caml_cos
 kernel_atan:
 	lui	$s1, 16042
 	ori	$s1, $s1, 43679
@@ -364,13 +355,13 @@ bne_else.8590:
 	jr	$ra
 vecset.2472:
 	swc1	$f0, 0($a0)
-	swc1	$f1, 8($a0)
-	swc1	$f2, 16($a0)
+	swc1	$f1, 4($a0)
+	swc1	$f2, 8($a0)
 	jr	$ra
 vecfill.2477:
 	swc1	$f0, 0($a0)
+	swc1	$f0, 4($a0)
 	swc1	$f0, 8($a0)
-	swc1	$f0, 16($a0)
 	jr	$ra
 vecbzero.2480:
 	lui	$s1, 0
@@ -380,10 +371,10 @@ vecbzero.2480:
 veccpy.2482:
 	lwc1	$f0, 0($a1)
 	swc1	$f0, 0($a0)
+	lwc1	$f0, 4($a1)
+	swc1	$f0, 4($a0)
 	lwc1	$f0, 8($a1)
 	swc1	$f0, 8($a0)
-	lwc1	$f0, 16($a1)
-	swc1	$f0, 16($a0)
 	jr	$ra
 vecunit_sgn.2490:
 	lwc1	$f0, 0($a0)
@@ -391,14 +382,14 @@ vecunit_sgn.2490:
 	sw	$a0, 4($sp)
 	sqrt	$f0, $f0
 	lw	$a0, 4($sp)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	swc1	$f0, 8($sp)
 	add.s	$f0, $fzero, $f1
 	sqrt	$f0, $f0
 	lwc1	$f1, 8($sp)
 	add.s	$f0, $f1, $f0
 	lw	$a0, 4($sp)
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	swc1	$f0, 16($sp)
 	add.s	$f0, $fzero, $f1
 	sqrt	$f0, $f0
@@ -435,33 +426,33 @@ beq_cont.8595:
 	lwc1	$f1, 0($a0)
 	mul.s	$f1, $f1, $f0
 	swc1	$f1, 0($a0)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	mul.s	$f1, $f1, $f0
-	swc1	$f1, 8($a0)
-	lwc1	$f1, 16($a0)
+	swc1	$f1, 4($a0)
+	lwc1	$f1, 8($a0)
 	mul.s	$f0, $f1, $f0
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	jr	$ra
 veciprod.2493:
 	lwc1	$f0, 0($a0)
 	lwc1	$f1, 0($a1)
 	mul.s	$f0, $f0, $f1
-	lwc1	$f1, 8($a0)
-	lwc1	$f2, 8($a1)
+	lwc1	$f1, 4($a0)
+	lwc1	$f2, 4($a1)
 	mul.s	$f1, $f1, $f2
 	add.s	$f0, $f0, $f1
-	lwc1	$f1, 16($a0)
-	lwc1	$f2, 16($a1)
+	lwc1	$f1, 8($a0)
+	lwc1	$f2, 8($a1)
 	mul.s	$f1, $f1, $f2
 	add.s	$f0, $f0, $f1
 	jr	$ra
 veciprod2.2496:
 	lwc1	$f3, 0($a0)
 	mul.s	$f0, $f3, $f0
-	lwc1	$f3, 8($a0)
+	lwc1	$f3, 4($a0)
 	mul.s	$f1, $f3, $f1
 	add.s	$f0, $f0, $f1
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	mul.s	$f1, $f1, $f2
 	add.s	$f0, $f0, $f1
 	jr	$ra
@@ -471,41 +462,41 @@ vecaccum.2501:
 	mul.s	$f2, $f0, $f2
 	add.s	$f1, $f1, $f2
 	swc1	$f1, 0($a0)
-	lwc1	$f1, 8($a0)
-	lwc1	$f2, 8($a1)
+	lwc1	$f1, 4($a0)
+	lwc1	$f2, 4($a1)
 	mul.s	$f2, $f0, $f2
 	add.s	$f1, $f1, $f2
-	swc1	$f1, 8($a0)
-	lwc1	$f1, 16($a0)
-	lwc1	$f2, 16($a1)
+	swc1	$f1, 4($a0)
+	lwc1	$f1, 8($a0)
+	lwc1	$f2, 8($a1)
 	mul.s	$f0, $f0, $f2
 	add.s	$f0, $f1, $f0
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	jr	$ra
 vecadd.2505:
 	lwc1	$f0, 0($a0)
 	lwc1	$f1, 0($a1)
 	add.s	$f0, $f0, $f1
 	swc1	$f0, 0($a0)
+	lwc1	$f0, 4($a0)
+	lwc1	$f1, 4($a1)
+	add.s	$f0, $f0, $f1
+	swc1	$f0, 4($a0)
 	lwc1	$f0, 8($a0)
 	lwc1	$f1, 8($a1)
 	add.s	$f0, $f0, $f1
 	swc1	$f0, 8($a0)
-	lwc1	$f0, 16($a0)
-	lwc1	$f1, 16($a1)
-	add.s	$f0, $f0, $f1
-	swc1	$f0, 16($a0)
 	jr	$ra
 vecscale.2511:
 	lwc1	$f1, 0($a0)
 	mul.s	$f1, $f1, $f0
 	swc1	$f1, 0($a0)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	mul.s	$f1, $f1, $f0
-	swc1	$f1, 8($a0)
-	lwc1	$f1, 16($a0)
+	swc1	$f1, 4($a0)
+	lwc1	$f1, 8($a0)
 	mul.s	$f0, $f1, $f0
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	jr	$ra
 vecaccumv.2514:
 	lwc1	$f0, 0($a0)
@@ -514,18 +505,18 @@ vecaccumv.2514:
 	mul.s	$f1, $f1, $f2
 	add.s	$f0, $f0, $f1
 	swc1	$f0, 0($a0)
+	lwc1	$f0, 4($a0)
+	lwc1	$f1, 4($a1)
+	lwc1	$f2, 4($a2)
+	mul.s	$f1, $f1, $f2
+	add.s	$f0, $f0, $f1
+	swc1	$f0, 4($a0)
 	lwc1	$f0, 8($a0)
 	lwc1	$f1, 8($a1)
 	lwc1	$f2, 8($a2)
 	mul.s	$f1, $f1, $f2
 	add.s	$f0, $f0, $f1
 	swc1	$f0, 8($a0)
-	lwc1	$f0, 16($a0)
-	lwc1	$f1, 16($a1)
-	lwc1	$f2, 16($a2)
-	mul.s	$f1, $f1, $f2
-	add.s	$f0, $f0, $f1
-	swc1	$f0, 16($a0)
 	jr	$ra
 o_texturetype.2518:
 	lw	$a0, 0($a0)
@@ -548,11 +539,11 @@ o_param_a.2528:
 	jr	$ra
 o_param_b.2530:
 	lw	$a0, 16($a0)
-	lwc1	$f0, 8($a0)
+	lwc1	$f0, 4($a0)
 	jr	$ra
 o_param_c.2532:
 	lw	$a0, 16($a0)
-	lwc1	$f0, 16($a0)
+	lwc1	$f0, 8($a0)
 	jr	$ra
 o_param_abc.2534:
 	lw	$a0, 16($a0)
@@ -563,11 +554,11 @@ o_param_x.2536:
 	jr	$ra
 o_param_y.2538:
 	lw	$a0, 20($a0)
-	lwc1	$f0, 8($a0)
+	lwc1	$f0, 4($a0)
 	jr	$ra
 o_param_z.2540:
 	lw	$a0, 20($a0)
-	lwc1	$f0, 16($a0)
+	lwc1	$f0, 8($a0)
 	jr	$ra
 o_diffuse.2542:
 	lw	$a0, 28($a0)
@@ -575,7 +566,7 @@ o_diffuse.2542:
 	jr	$ra
 o_hilight.2544:
 	lw	$a0, 28($a0)
-	lwc1	$f0, 8($a0)
+	lwc1	$f0, 4($a0)
 	jr	$ra
 o_color_red.2546:
 	lw	$a0, 32($a0)
@@ -583,11 +574,11 @@ o_color_red.2546:
 	jr	$ra
 o_color_green.2548:
 	lw	$a0, 32($a0)
-	lwc1	$f0, 8($a0)
+	lwc1	$f0, 4($a0)
 	jr	$ra
 o_color_blue.2550:
 	lw	$a0, 32($a0)
-	lwc1	$f0, 16($a0)
+	lwc1	$f0, 8($a0)
 	jr	$ra
 o_param_r1.2552:
 	lw	$a0, 36($a0)
@@ -595,11 +586,11 @@ o_param_r1.2552:
 	jr	$ra
 o_param_r2.2554:
 	lw	$a0, 36($a0)
-	lwc1	$f0, 8($a0)
+	lwc1	$f0, 4($a0)
 	jr	$ra
 o_param_r3.2556:
 	lw	$a0, 36($a0)
-	lwc1	$f0, 16($a0)
+	lwc1	$f0, 8($a0)
 	jr	$ra
 o_param_ctbl.2558:
 	lw	$a0, 40($a0)
@@ -670,10 +661,10 @@ read_screen_settings.2591:
 	swc1	$f0, 0($a0)
 	readf	$f0
 	lw	$a0, 16($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	readf	$f0
 	lw	$a0, 16($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	readf	$f0
 	sw	$ra, 20($sp)
 	addi	$sp, $sp, 24
@@ -728,44 +719,44 @@ read_screen_settings.2591:
 	mtc1	$s1, $f2
 	lwc1	$f3, 40($sp)
 	mul.s	$f2, $f3, $f2
-	swc1	$f2, 8($a0)
+	swc1	$f2, 4($a0)
 	lwc1	$f2, 56($sp)
 	mul.s	$f4, $f1, $f2
 	lui	$s1, 17224
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f5
 	mul.s	$f4, $f4, $f5
-	swc1	$f4, 16($a0)
+	swc1	$f4, 8($a0)
 	lw	$a1, 8($sp)
 	swc1	$f2, 0($a1)
 	lui	$s1, 0
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f4
-	swc1	$f4, 8($a1)
+	swc1	$f4, 4($a1)
 	sub.s	$f4, $fzero, $f0
-	swc1	$f4, 16($a1)
+	swc1	$f4, 8($a1)
 	sub.s	$f3, $fzero, $f3
 	mul.s	$f0, $f3, $f0
 	lw	$a1, 4($sp)
 	swc1	$f0, 0($a1)
 	sub.s	$f0, $fzero, $f1
-	swc1	$f0, 8($a1)
+	swc1	$f0, 4($a1)
 	mul.s	$f0, $f3, $f2
-	swc1	$f0, 16($a1)
+	swc1	$f0, 8($a1)
 	lw	$a1, 16($sp)
 	lwc1	$f0, 0($a1)
 	lwc1	$f1, 0($a0)
 	sub.s	$f0, $f0, $f1
 	lw	$a2, 0($sp)
 	swc1	$f0, 0($a2)
+	lwc1	$f0, 4($a1)
+	lwc1	$f1, 4($a0)
+	sub.s	$f0, $f0, $f1
+	swc1	$f0, 4($a2)
 	lwc1	$f0, 8($a1)
 	lwc1	$f1, 8($a0)
 	sub.s	$f0, $f0, $f1
 	swc1	$f0, 8($a2)
-	lwc1	$f0, 16($a1)
-	lwc1	$f1, 16($a0)
-	sub.s	$f0, $f0, $f1
-	swc1	$f0, 16($a2)
 	jr	$ra
 read_light.2593:
 	lw	$a0, 8($s7)
@@ -787,7 +778,7 @@ read_light.2593:
 	lw	$ra, 20($sp)
 	sub.s	$f0, $fzero, $f0
 	lw	$a0, 4($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	readf	$f0
 	sw	$ra, 20($sp)
 	addi	$sp, $sp, 24
@@ -823,7 +814,7 @@ read_light.2593:
 	lwc1	$f1, 24($sp)
 	mul.s	$f0, $f1, $f0
 	lw	$a0, 4($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	readf	$f0
 	lw	$a0, 0($sp)
 	swc1	$f0, 0($a0)
@@ -847,7 +838,7 @@ rotate_quadratic_matrix.2595:
 	addi	$sp, $sp, -24
 	lw	$ra, 20($sp)
 	lw	$a0, 4($sp)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	swc1	$f0, 16($sp)
 	add.s	$f0, $fzero, $f1
 	sw	$ra, 28($sp)
@@ -856,7 +847,7 @@ rotate_quadratic_matrix.2595:
 	addi	$sp, $sp, -32
 	lw	$ra, 28($sp)
 	lw	$a0, 4($sp)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	swc1	$f0, 24($sp)
 	add.s	$f0, $fzero, $f1
 	sw	$ra, 36($sp)
@@ -865,7 +856,7 @@ rotate_quadratic_matrix.2595:
 	addi	$sp, $sp, -40
 	lw	$ra, 36($sp)
 	lw	$a0, 4($sp)
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	swc1	$f0, 32($sp)
 	add.s	$f0, $fzero, $f1
 	sw	$ra, 44($sp)
@@ -874,7 +865,7 @@ rotate_quadratic_matrix.2595:
 	addi	$sp, $sp, -48
 	lw	$ra, 44($sp)
 	lw	$a0, 4($sp)
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	swc1	$f0, 40($sp)
 	add.s	$f0, $fzero, $f1
 	sw	$ra, 52($sp)
@@ -908,8 +899,8 @@ rotate_quadratic_matrix.2595:
 	mul.s	$f2, $f8, $f2
 	lw	$a0, 0($sp)
 	lwc1	$f5, 0($a0)
-	lwc1	$f8, 8($a0)
-	lwc1	$f9, 16($a0)
+	lwc1	$f8, 4($a0)
+	lwc1	$f9, 8($a0)
 	swc1	$f3, 48($sp)
 	swc1	$f2, 56($sp)
 	swc1	$f0, 64($sp)
@@ -965,7 +956,7 @@ rotate_quadratic_matrix.2595:
 	lwc1	$f2, 168($sp)
 	add.s	$f0, $f2, $f0
 	lw	$a0, 0($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	lwc1	$f0, 72($sp)
 	sqrt	$f0, $f0
 	lwc1	$f1, 136($sp)
@@ -987,7 +978,7 @@ rotate_quadratic_matrix.2595:
 	lwc1	$f2, 184($sp)
 	add.s	$f0, $f2, $f0
 	lw	$a0, 0($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	lui	$s1, 16384
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f0
@@ -1025,7 +1016,7 @@ rotate_quadratic_matrix.2595:
 	mul.s	$f7, $f1, $f11
 	add.s	$f4, $f4, $f7
 	mul.s	$f0, $f0, $f4
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	lui	$s1, 16384
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f0
@@ -1035,7 +1026,7 @@ rotate_quadratic_matrix.2595:
 	mul.s	$f1, $f1, $f8
 	add.s	$f1, $f2, $f1
 	mul.s	$f0, $f0, $f1
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	jr	$ra
 read_nth_object.2598:
 	lw	$a1, 4($s7)
@@ -1070,10 +1061,10 @@ bne_else.8608:
 	swc1	$f0, 0($a0)
 	readf	$f0
 	lw	$a0, 24($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	readf	$f0
 	lw	$a0, 24($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	addi	$a1, $zero, 3
 	lui	$s1, 0
 	ori	$s1, $s1, 0
@@ -1090,10 +1081,10 @@ bne_else.8608:
 	swc1	$f0, 0($a0)
 	readf	$f0
 	lw	$a0, 28($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	readf	$f0
 	lw	$a0, 28($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	readf	$f0
 	slt	$a0, $f0, $zero
 	addi	$a1, $zero, 2
@@ -1113,7 +1104,7 @@ bne_else.8608:
 	swc1	$f0, 0($a0)
 	readf	$f0
 	lw	$a0, 36($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	addi	$a1, $zero, 3
 	lui	$s1, 0
 	ori	$s1, $s1, 0
@@ -1130,10 +1121,10 @@ bne_else.8608:
 	swc1	$f0, 0($a0)
 	readf	$f0
 	lw	$a0, 40($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	readf	$f0
 	lw	$a0, 40($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	addi	$a1, $zero, 3
 	lui	$s1, 0
 	ori	$s1, $s1, 0
@@ -1164,7 +1155,7 @@ beq_else.8609:
 	addi	$sp, $sp, -56
 	lw	$ra, 52($sp)
 	lw	$a0, 44($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	readf	$f0
 	sw	$ra, 52($sp)
 	addi	$sp, $sp, 56
@@ -1172,7 +1163,7 @@ beq_else.8609:
 	addi	$sp, $sp, -56
 	lw	$ra, 52($sp)
 	lw	$a0, 44($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 beq_cont.8610:
 	lw	$a1, 12($sp)
 	addi	$s1, $zero, 2
@@ -1220,7 +1211,7 @@ beq_cont.8612:
 	lw	$t1, 4($sp)
 	sll	$t1, $t1, 2
 	lw	$t2, 0($sp)
-	add	$s1, $t2, $a1
+	add	$s1, $t2, $t1
 	sw	$a1, 0($s1)
 	addi	$s1, $zero, 3
 	bne	$t0, $s1, beq_else.8613
@@ -1250,7 +1241,7 @@ beq_else.8616:
 beq_cont.8617:
 	lw	$a0, 24($sp)
 	swc1	$f0, 0($a0)
-	lwc1	$f0, 8($a0)
+	lwc1	$f0, 4($a0)
 	swc1	$f0, 72($sp)
 	slt	$a0, $fzero, $f0
 	slt	$s0, $f0, $fzero
@@ -1275,8 +1266,8 @@ beq_else.8618:
 	mtc1	$s1, $f0
 beq_cont.8619:
 	lw	$a0, 24($sp)
-	swc1	$f0, 8($a0)
-	lwc1	$f0, 16($a0)
+	swc1	$f0, 4($a0)
+	lwc1	$f0, 8($a0)
 	swc1	$f0, 88($sp)
 	slt	$a0, $fzero, $f0
 	slt	$s0, $f0, $fzero
@@ -1301,7 +1292,7 @@ beq_else.8620:
 	mtc1	$s1, $f0
 beq_cont.8621:
 	lw	$a0, 24($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	j	beq_cont.8614
 beq_else.8613:
 	addi	$s1, $zero, 2
@@ -1395,7 +1386,7 @@ bne_else.8633:
 	lw	$a1, 0($sp)
 	sll	$a1, $a1, 2
 	lw	$a2, 4($sp)
-	add	$s1, $a0, $a2
+	add	$s1, $a0, $a1
 	sw	$a2, 0($s1)
 	jr	$ra
 read_or_network.2606:
@@ -1427,7 +1418,7 @@ bne_else.8634:
 	lw	$a1, 0($sp)
 	sll	$a1, $a1, 2
 	lw	$a2, 4($sp)
-	add	$s1, $a0, $a2
+	add	$s1, $a0, $a1
 	sw	$a2, 0($s1)
 	jr	$ra
 read_and_network.2608:
@@ -1450,7 +1441,7 @@ bne_else.8635:
 	lw	$a1, 8($sp)
 	sll	$a2, $a1, 2
 	lw	$a3, 4($sp)
-	add	$s1, $a3, $a0
+	add	$s1, $a3, $a2
 	sw	$a0, 0($s1)
 	addi	$a0, $a1, 1
 	lw	$s7, 0($sp)
@@ -1518,8 +1509,8 @@ tmp.8640:
 	jr	$ra
 solver_rect_surface.2612:
 	lw	$t1, 4($s7)
-	sll	$t2, $a2, 3
-	add	$s1, $a1, $f3
+	sll	$t2, $a2, 2
+	add	$s1, $a1, $t2
 	lwc1	$f3, 0($s1)
 	sw	$t1, 0($sp)
 	swc1	$f2, 8($sp)
@@ -1550,9 +1541,9 @@ solver_rect_surface.2612:
 	addi	$sp, $sp, -72
 	lw	$ra, 68($sp)
 	lw	$a1, 52($sp)
-	sll	$a2, $a1, 3
+	sll	$a2, $a1, 2
 	lw	$a3, 48($sp)
-	add	$s1, $a3, $f0
+	add	$s1, $a3, $a2
 	lwc1	$f0, 0($s1)
 	sw	$a0, 64($sp)
 	slt	$a0, $f0, $zero
@@ -1563,9 +1554,9 @@ solver_rect_surface.2612:
 	addi	$sp, $sp, -72
 	lw	$ra, 68($sp)
 	lw	$a1, 52($sp)
-	sll	$a2, $a1, 3
+	sll	$a2, $a1, 2
 	lw	$a3, 60($sp)
-	add	$s1, $a3, $f0
+	add	$s1, $a3, $a2
 	lwc1	$f0, 0($s1)
 	sw	$ra, 68($sp)
 	addi	$sp, $sp, 72
@@ -1575,14 +1566,14 @@ solver_rect_surface.2612:
 	lwc1	$f1, 40($sp)
 	sub.s	$f0, $f0, $f1
 	lw	$a0, 52($sp)
-	sll	$a0, $a0, 3
+	sll	$a0, $a0, 2
 	lw	$a1, 48($sp)
-	add	$s1, $a1, $f1
+	add	$s1, $a1, $a0
 	lwc1	$f1, 0($s1)
 	div.s	$f0, $f0, $f1
 	lw	$a0, 32($sp)
-	sll	$a2, $a0, 3
-	add	$s1, $a1, $f1
+	sll	$a2, $a0, 2
+	add	$s1, $a1, $a2
 	lwc1	$f1, 0($s1)
 	mul.s	$f1, $f0, $f1
 	lwc1	$f2, 24($sp)
@@ -1595,9 +1586,9 @@ solver_rect_surface.2612:
 	addi	$sp, $sp, -88
 	lw	$ra, 84($sp)
 	lw	$a0, 32($sp)
-	sll	$a0, $a0, 3
+	sll	$a0, $a0, 2
 	lw	$a1, 60($sp)
-	add	$s1, $a1, $f1
+	add	$s1, $a1, $a0
 	lwc1	$f1, 0($s1)
 	c.lt.s	$a0, $a0, $a1
 	bne	$a0, $zero, bne_else.8647
@@ -1605,9 +1596,9 @@ solver_rect_surface.2612:
 	jr	$ra
 bne_else.8647:
 	lw	$a0, 16($sp)
-	sll	$a1, $a0, 3
+	sll	$a1, $a0, 2
 	lw	$a2, 48($sp)
-	add	$s1, $a2, $f0
+	add	$s1, $a2, $a1
 	lwc1	$f0, 0($s1)
 	lwc1	$f1, 72($sp)
 	mul.s	$f0, $f1, $f0
@@ -1619,9 +1610,9 @@ bne_else.8647:
 	addi	$sp, $sp, -88
 	lw	$ra, 84($sp)
 	lw	$a0, 16($sp)
-	sll	$a0, $a0, 3
+	sll	$a0, $a0, 2
 	lw	$a1, 60($sp)
-	add	$s1, $a1, $f1
+	add	$s1, $a1, $a0
 	lwc1	$f1, 0($s1)
 	c.lt.s	$a0, $a0, $a1
 	bne	$a0, $zero, bne_else.8648
@@ -1970,8 +1961,8 @@ bne_else.8660:
 solver_second.2646:
 	lw	$a2, 4($s7)
 	lwc1	$f3, 0($a1)
-	lwc1	$f4, 8($a1)
-	lwc1	$f5, 16($a1)
+	lwc1	$f4, 4($a1)
+	lwc1	$f5, 8($a1)
 	sw	$a2, 0($sp)
 	swc1	$f2, 8($sp)
 	swc1	$f1, 16($sp)
@@ -1993,8 +1984,8 @@ solver_second.2646:
 	bne	$a0, $zero, bne_else.8662
 	lw	$a0, 36($sp)
 	lwc1	$f0, 0($a0)
-	lwc1	$f1, 8($a0)
-	lwc1	$f2, 16($a0)
+	lwc1	$f1, 4($a0)
+	lwc1	$f2, 8($a0)
 	lwc1	$f3, 24($sp)
 	lwc1	$f4, 16($sp)
 	lwc1	$f5, 8($sp)
@@ -2100,7 +2091,7 @@ solver.2652:
 	lwc1	$f1, 24($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 20($sp)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	lw	$a1, 16($sp)
 	swc1	$f0, 32($sp)
 	swc1	$f1, 40($sp)
@@ -2113,7 +2104,7 @@ solver.2652:
 	lwc1	$f1, 40($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 20($sp)
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	lw	$a0, 16($sp)
 	swc1	$f0, 48($sp)
 	swc1	$f1, 56($sp)
@@ -2165,9 +2156,9 @@ solver_rect_fast.2656:
 	lw	$a3, 4($s7)
 	lwc1	$f3, 0($a2)
 	sub.s	$f3, $f3, $f0
-	lwc1	$f4, 8($a2)
+	lwc1	$f4, 4($a2)
 	mul.s	$f3, $f3, $f4
-	lwc1	$f4, 8($a1)
+	lwc1	$f4, 4($a1)
 	mul.s	$f4, $f3, $f4
 	add.s	$f4, $f4, $f1
 	sw	$a3, 0($sp)
@@ -2199,7 +2190,7 @@ solver_rect_fast.2656:
 	j	beq_cont.8673
 beq_else.8672:
 	lw	$a0, 48($sp)
-	lwc1	$f0, 16($a0)
+	lwc1	$f0, 8($a0)
 	lwc1	$f1, 40($sp)
 	mul.s	$f0, $f1, $f0
 	lwc1	$f2, 32($sp)
@@ -2224,7 +2215,7 @@ beq_else.8672:
 	j	beq_cont.8675
 beq_else.8674:
 	lw	$a0, 24($sp)
-	lwc1	$f0, 8($a0)
+	lwc1	$f0, 4($a0)
 	slt	$a0, $fzero, $f0
 	slt	$s0, $f0, $fzero
 	add	$a0, $a0, $s0
@@ -2238,10 +2229,10 @@ beq_cont.8675:
 beq_cont.8673:
 	bne	$a0, $zero, bne_else.8678
 	lw	$a0, 24($sp)
-	lwc1	$f0, 16($a0)
+	lwc1	$f0, 8($a0)
 	lwc1	$f1, 16($sp)
 	sub.s	$f0, $f0, $f1
-	lwc1	$f2, 24($a0)
+	lwc1	$f2, 12($a0)
 	mul.s	$f0, $f0, $f2
 	lw	$a1, 48($sp)
 	lwc1	$f2, 0($a1)
@@ -2270,7 +2261,7 @@ beq_cont.8673:
 	j	beq_cont.8680
 beq_else.8679:
 	lw	$a0, 48($sp)
-	lwc1	$f0, 16($a0)
+	lwc1	$f0, 8($a0)
 	lwc1	$f1, 72($sp)
 	mul.s	$f0, $f1, $f0
 	lwc1	$f2, 32($sp)
@@ -2295,7 +2286,7 @@ beq_else.8679:
 	j	beq_cont.8682
 beq_else.8681:
 	lw	$a0, 24($sp)
-	lwc1	$f0, 24($a0)
+	lwc1	$f0, 12($a0)
 	slt	$a0, $fzero, $f0
 	slt	$s0, $f0, $fzero
 	add	$a0, $a0, $s0
@@ -2309,10 +2300,10 @@ beq_cont.8682:
 beq_cont.8680:
 	bne	$a0, $zero, bne_else.8685
 	lw	$a0, 24($sp)
-	lwc1	$f0, 32($a0)
+	lwc1	$f0, 16($a0)
 	lwc1	$f1, 32($sp)
 	sub.s	$f0, $f0, $f1
-	lwc1	$f1, 40($a0)
+	lwc1	$f1, 20($a0)
 	mul.s	$f0, $f0, $f1
 	lw	$a1, 48($sp)
 	lwc1	$f1, 0($a1)
@@ -2341,7 +2332,7 @@ beq_cont.8680:
 	j	beq_cont.8687
 beq_else.8686:
 	lw	$a0, 48($sp)
-	lwc1	$f0, 8($a0)
+	lwc1	$f0, 4($a0)
 	lwc1	$f1, 96($sp)
 	mul.s	$f0, $f1, $f0
 	lwc1	$f2, 16($sp)
@@ -2366,7 +2357,7 @@ beq_else.8686:
 	j	beq_cont.8689
 beq_else.8688:
 	lw	$a0, 24($sp)
-	lwc1	$f0, 40($a0)
+	lwc1	$f0, 20($a0)
 	slt	$a0, $fzero, $f0
 	slt	$s0, $f0, $fzero
 	add	$a0, $a0, $s0
@@ -2414,14 +2405,14 @@ solver_surface_fast.2663:
 	jr	$ra
 bne_else.8694:
 	lw	$a0, 32($sp)
-	lwc1	$f0, 8($a0)
+	lwc1	$f0, 4($a0)
 	lwc1	$f1, 24($sp)
 	mul.s	$f0, $f0, $f1
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	lwc1	$f2, 16($sp)
 	mul.s	$f1, $f1, $f2
 	add.s	$f0, $f0, $f1
-	lwc1	$f1, 24($a0)
+	lwc1	$f1, 12($a0)
 	lwc1	$f2, 8($sp)
 	mul.s	$f1, $f1, $f2
 	add.s	$f0, $f0, $f1
@@ -2445,14 +2436,14 @@ solver_second_fast.2669:
 	add	$a0, $a0, $s0
 	bne	$a0, $zero, bne_else.8697
 	lw	$a0, 48($sp)
-	lwc1	$f0, 8($a0)
+	lwc1	$f0, 4($a0)
 	lwc1	$f1, 40($sp)
 	mul.s	$f0, $f0, $f1
-	lwc1	$f2, 16($a0)
+	lwc1	$f2, 8($a0)
 	lwc1	$f3, 32($sp)
 	mul.s	$f2, $f2, $f3
 	add.s	$f0, $f0, $f2
-	lwc1	$f2, 24($a0)
+	lwc1	$f2, 12($a0)
 	lwc1	$f4, 24($sp)
 	mul.s	$f2, $f2, $f4
 	add.s	$f0, $f0, $f2
@@ -2511,7 +2502,7 @@ bne_else.8701:
 	lwc1	$f1, 56($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 48($sp)
-	lwc1	$f1, 32($a0)
+	lwc1	$f1, 16($a0)
 	mul.s	$f0, $f0, $f1
 	lw	$a0, 0($sp)
 	swc1	$f0, 0($a0)
@@ -2522,7 +2513,7 @@ beq_else.8702:
 	lwc1	$f1, 56($sp)
 	add.s	$f0, $f1, $f0
 	lw	$a0, 48($sp)
-	lwc1	$f1, 32($a0)
+	lwc1	$f1, 16($a0)
 	mul.s	$f0, $f0, $f1
 	lw	$a0, 0($sp)
 	swc1	$f0, 0($a0)
@@ -2538,7 +2529,7 @@ solver_fast.2675:
 	lw	$t1, 8($s7)
 	lw	$t2, 4($s7)
 	sll	$t3, $a0, 2
-	add	$s1, $t2, $t2
+	add	$s1, $t2, $t3
 	lw	$t2, 0($s1)
 	lwc1	$f0, 0($a2)
 	sw	$t0, 0($sp)
@@ -2558,7 +2549,7 @@ solver_fast.2675:
 	lwc1	$f1, 32($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 24($sp)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	lw	$a1, 20($sp)
 	swc1	$f0, 40($sp)
 	swc1	$f1, 48($sp)
@@ -2571,7 +2562,7 @@ solver_fast.2675:
 	lwc1	$f1, 48($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 24($sp)
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	lw	$a0, 20($sp)
 	swc1	$f0, 56($sp)
 	swc1	$f1, 64($sp)
@@ -2591,7 +2582,7 @@ solver_fast.2675:
 	lw	$ra, 84($sp)
 	lw	$a1, 12($sp)
 	sll	$a1, $a1, 2
-	add	$s1, $a0, $a0
+	add	$s1, $a0, $a1
 	lw	$a0, 0($s1)
 	lw	$a1, 20($sp)
 	sw	$a0, 80($sp)
@@ -2652,7 +2643,7 @@ bne_else.8707:
 	lw	$a0, 8($sp)
 	lwc1	$f0, 0($a0)
 	lw	$a0, 4($sp)
-	lwc1	$f1, 24($a0)
+	lwc1	$f1, 12($a0)
 	mul.s	$f0, $f0, $f1
 	lw	$a0, 0($sp)
 	swc1	$f0, 0($a0)
@@ -2675,19 +2666,19 @@ solver_second_fast2.2686:
 	add	$a0, $a0, $s0
 	bne	$a0, $zero, bne_else.8709
 	lw	$a0, 48($sp)
-	lwc1	$f0, 8($a0)
+	lwc1	$f0, 4($a0)
 	lwc1	$f1, 40($sp)
 	mul.s	$f0, $f0, $f1
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	lwc1	$f2, 32($sp)
 	mul.s	$f1, $f1, $f2
 	add.s	$f0, $f0, $f1
-	lwc1	$f1, 24($a0)
+	lwc1	$f1, 12($a0)
 	lwc1	$f2, 24($sp)
 	mul.s	$f1, $f1, $f2
 	add.s	$f0, $f0, $f1
 	lw	$a1, 16($sp)
-	lwc1	$f1, 24($a1)
+	lwc1	$f1, 12($a1)
 	swc1	$f0, 56($sp)
 	swc1	$f1, 64($sp)
 	sqrt	$f0, $f0
@@ -2713,7 +2704,7 @@ bne_else.8711:
 	lwc1	$f1, 56($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 48($sp)
-	lwc1	$f1, 32($a0)
+	lwc1	$f1, 16($a0)
 	mul.s	$f0, $f0, $f1
 	lw	$a0, 0($sp)
 	swc1	$f0, 0($a0)
@@ -2724,7 +2715,7 @@ beq_else.8712:
 	lwc1	$f1, 56($sp)
 	add.s	$f0, $f1, $f0
 	lw	$a0, 48($sp)
-	lwc1	$f1, 32($a0)
+	lwc1	$f1, 16($a0)
 	mul.s	$f0, $f0, $f1
 	lw	$a0, 0($sp)
 	swc1	$f0, 0($a0)
@@ -2740,7 +2731,7 @@ solver_fast2.2693:
 	lw	$t0, 8($s7)
 	lw	$t1, 4($s7)
 	sll	$t2, $a0, 2
-	add	$s1, $t1, $t1
+	add	$s1, $t1, $t2
 	lw	$t1, 0($s1)
 	sw	$a3, 0($sp)
 	sw	$a2, 4($sp)
@@ -2755,8 +2746,8 @@ solver_fast2.2693:
 	addi	$sp, $sp, -32
 	lw	$ra, 28($sp)
 	lwc1	$f0, 0($a0)
-	lwc1	$f1, 8($a0)
-	lwc1	$f2, 16($a0)
+	lwc1	$f1, 4($a0)
+	lwc1	$f2, 8($a0)
 	lw	$a1, 20($sp)
 	sw	$a0, 24($sp)
 	swc1	$f2, 32($sp)
@@ -2770,7 +2761,7 @@ solver_fast2.2693:
 	lw	$ra, 60($sp)
 	lw	$a1, 16($sp)
 	sll	$a1, $a1, 2
-	add	$s1, $a0, $a0
+	add	$s1, $a0, $a1
 	lw	$a0, 0($s1)
 	lw	$a1, 12($sp)
 	sw	$a0, 56($sp)
@@ -2877,17 +2868,17 @@ setup_rect_table.2696:
 	lw	$a1, 4($sp)
 	lwc1	$f1, 0($a1)
 	div.s	$f0, $f0, $f1
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	j	beq_cont.8718
 beq_else.8717:
 	lui	$s1, 0
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f0
 	lw	$a0, 8($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 beq_cont.8718:
 	lw	$a1, 4($sp)
-	lwc1	$f0, 8($a1)
+	lwc1	$f0, 4($a1)
 	slt	$a0, $fzero, $f0
 	slt	$s0, $f0, $fzero
 	add	$a0, $a0, $s0
@@ -2899,7 +2890,7 @@ beq_cont.8718:
 	addi	$sp, $sp, -24
 	lw	$ra, 20($sp)
 	lw	$a1, 4($sp)
-	lwc1	$f0, 8($a1)
+	lwc1	$f0, 4($a1)
 	sw	$a0, 20($sp)
 	slt	$a0, $f0, $zero
 	lw	$a0, 20($sp)
@@ -2923,24 +2914,24 @@ beq_cont.8718:
 	addi	$sp, $sp, -32
 	lw	$ra, 28($sp)
 	lw	$a0, 8($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	lui	$s1, 16256
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f0
 	lw	$a1, 4($sp)
-	lwc1	$f1, 8($a1)
+	lwc1	$f1, 4($a1)
 	div.s	$f0, $f0, $f1
-	swc1	$f0, 24($a0)
+	swc1	$f0, 12($a0)
 	j	beq_cont.8720
 beq_else.8719:
 	lui	$s1, 0
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f0
 	lw	$a0, 8($sp)
-	swc1	$f0, 24($a0)
+	swc1	$f0, 12($a0)
 beq_cont.8720:
 	lw	$a1, 4($sp)
-	lwc1	$f0, 16($a1)
+	lwc1	$f0, 8($a1)
 	slt	$a0, $fzero, $f0
 	slt	$s0, $f0, $fzero
 	add	$a0, $a0, $s0
@@ -2952,7 +2943,7 @@ beq_cont.8720:
 	addi	$sp, $sp, -32
 	lw	$ra, 28($sp)
 	lw	$a1, 4($sp)
-	lwc1	$f0, 16($a1)
+	lwc1	$f0, 8($a1)
 	sw	$a0, 28($sp)
 	slt	$a0, $f0, $zero
 	lw	$a0, 28($sp)
@@ -2976,21 +2967,21 @@ beq_cont.8720:
 	addi	$sp, $sp, -40
 	lw	$ra, 36($sp)
 	lw	$a0, 8($sp)
-	swc1	$f0, 32($a0)
+	swc1	$f0, 16($a0)
 	lui	$s1, 16256
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f0
 	lw	$a1, 4($sp)
-	lwc1	$f1, 16($a1)
+	lwc1	$f1, 8($a1)
 	div.s	$f0, $f0, $f1
-	swc1	$f0, 40($a0)
+	swc1	$f0, 20($a0)
 	j	beq_cont.8722
 beq_else.8721:
 	lui	$s1, 0
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f0
 	lw	$a0, 8($sp)
-	swc1	$f0, 40($a0)
+	swc1	$f0, 20($a0)
 beq_cont.8722:
 	jr	$ra
 setup_surface_table.2699:
@@ -3020,7 +3011,7 @@ setup_surface_table.2699:
 	lwc1	$f1, 16($sp)
 	mul.s	$f0, $f1, $f0
 	lw	$a0, 4($sp)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	lw	$a1, 0($sp)
 	swc1	$f0, 24($sp)
 	swc1	$f1, 32($sp)
@@ -3035,7 +3026,7 @@ setup_surface_table.2699:
 	lwc1	$f1, 24($sp)
 	add.s	$f0, $f1, $f0
 	lw	$a0, 4($sp)
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	lw	$a0, 0($sp)
 	swc1	$f0, 40($sp)
 	swc1	$f1, 48($sp)
@@ -3076,7 +3067,7 @@ beq_else.8724:
 	div.s	$f0, $f0, $f1
 	sub.s	$f0, $fzero, $f0
 	lw	$a0, 8($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	lw	$a1, 0($sp)
 	add	$a0, $zero, $a1
 	sw	$ra, 68($sp)
@@ -3088,7 +3079,7 @@ beq_else.8724:
 	div.s	$f0, $f0, $f1
 	sub.s	$f0, $fzero, $f0
 	lw	$a0, 8($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	lw	$a1, 0($sp)
 	add	$a0, $zero, $a1
 	sw	$ra, 68($sp)
@@ -3100,7 +3091,7 @@ beq_else.8724:
 	div.s	$f0, $f0, $f1
 	sub.s	$f0, $fzero, $f0
 	lw	$a0, 8($sp)
-	swc1	$f0, 24($a0)
+	swc1	$f0, 12($a0)
 beq_cont.8725:
 	jr	$ra
 setup_second_table.2702:
@@ -3118,8 +3109,8 @@ setup_second_table.2702:
 	lw	$ra, 12($sp)
 	lw	$a1, 4($sp)
 	lwc1	$f0, 0($a1)
-	lwc1	$f1, 8($a1)
-	lwc1	$f2, 16($a1)
+	lwc1	$f1, 4($a1)
+	lwc1	$f2, 8($a1)
 	lw	$a2, 0($sp)
 	sw	$a0, 8($sp)
 	add	$a0, $zero, $a2
@@ -3143,7 +3134,7 @@ setup_second_table.2702:
 	mul.s	$f0, $f1, $f0
 	sub.s	$f0, $fzero, $f0
 	lw	$a0, 4($sp)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	lw	$a1, 0($sp)
 	swc1	$f0, 32($sp)
 	swc1	$f1, 40($sp)
@@ -3157,7 +3148,7 @@ setup_second_table.2702:
 	mul.s	$f0, $f1, $f0
 	sub.s	$f0, $fzero, $f0
 	lw	$a0, 4($sp)
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	lw	$a1, 0($sp)
 	swc1	$f0, 48($sp)
 	swc1	$f1, 56($sp)
@@ -3184,15 +3175,15 @@ setup_second_table.2702:
 	bne	$a0, $zero, beq_else.8727
 	lw	$a0, 8($sp)
 	lwc1	$f0, 32($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	lwc1	$f0, 48($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	lwc1	$f0, 64($sp)
-	swc1	$f0, 24($a0)
+	swc1	$f0, 12($a0)
 	j	beq_cont.8728
 beq_else.8727:
 	lw	$a0, 4($sp)
-	lwc1	$f0, 16($a0)
+	lwc1	$f0, 8($a0)
 	lw	$a1, 0($sp)
 	swc1	$f0, 72($sp)
 	add	$a0, $zero, $a1
@@ -3204,7 +3195,7 @@ beq_else.8727:
 	lwc1	$f1, 72($sp)
 	mul.s	$f0, $f1, $f0
 	lw	$a0, 4($sp)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	lw	$a1, 0($sp)
 	swc1	$f0, 80($sp)
 	swc1	$f1, 88($sp)
@@ -3224,9 +3215,9 @@ beq_else.8727:
 	lwc1	$f1, 32($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 8($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	lw	$a1, 4($sp)
-	lwc1	$f0, 16($a1)
+	lwc1	$f0, 8($a1)
 	lw	$a2, 0($sp)
 	swc1	$f0, 96($sp)
 	add	$a0, $zero, $a2
@@ -3258,9 +3249,9 @@ beq_else.8727:
 	lwc1	$f1, 48($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 8($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	lw	$a1, 4($sp)
-	lwc1	$f0, 8($a1)
+	lwc1	$f0, 4($a1)
 	lw	$a2, 0($sp)
 	swc1	$f0, 120($sp)
 	add	$a0, $zero, $a2
@@ -3291,7 +3282,7 @@ beq_else.8727:
 	lwc1	$f1, 64($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 8($sp)
-	swc1	$f0, 24($a0)
+	swc1	$f0, 12($a0)
 beq_cont.8728:
 	lwc1	$f0, 16($sp)
 	slt	$a0, $fzero, $f0
@@ -3304,7 +3295,7 @@ beq_cont.8728:
 	lwc1	$f1, 16($sp)
 	div.s	$f0, $f0, $f1
 	lw	$a0, 8($sp)
-	swc1	$f0, 32($a0)
+	swc1	$f0, 16($a0)
 	j	beq_cont.8730
 beq_else.8729:
 beq_cont.8730:
@@ -3317,7 +3308,7 @@ iter_setup_dirvec_constants.2705:
 	jr	$ra
 bne_else.8731:
 	sll	$a3, $a1, 2
-	add	$s1, $a2, $a2
+	add	$s1, $a2, $a3
 	lw	$a2, 0($s1)
 	sw	$s7, 0($sp)
 	sw	$a1, 4($sp)
@@ -3356,7 +3347,7 @@ bne_else.8731:
 	lw	$a1, 4($sp)
 	sll	$a2, $a1, 2
 	lw	$a3, 16($sp)
-	add	$s1, $a3, $a0
+	add	$s1, $a3, $a2
 	sw	$a0, 0($s1)
 	j	beq_cont.8734
 beq_else.8733:
@@ -3372,7 +3363,7 @@ beq_else.8733:
 	lw	$a1, 4($sp)
 	sll	$a2, $a1, 2
 	lw	$a3, 16($sp)
-	add	$s1, $a3, $a0
+	add	$s1, $a3, $a2
 	sw	$a0, 0($s1)
 	j	beq_cont.8736
 beq_else.8735:
@@ -3386,7 +3377,7 @@ beq_else.8735:
 	lw	$a1, 4($sp)
 	sll	$a2, $a1, 2
 	lw	$a3, 16($sp)
-	add	$s1, $a3, $a0
+	add	$s1, $a3, $a2
 	sw	$a0, 0($s1)
 beq_cont.8736:
 beq_cont.8734:
@@ -3409,7 +3400,7 @@ setup_startp_constants.2710:
 	jr	$ra
 bne_else.8737:
 	sll	$a3, $a1, 2
-	add	$s1, $a2, $a2
+	add	$s1, $a2, $a3
 	lw	$a2, 0($s1)
 	sw	$s7, 0($sp)
 	sw	$a1, 4($sp)
@@ -3445,7 +3436,7 @@ bne_else.8737:
 	lw	$a0, 16($sp)
 	swc1	$f0, 0($a0)
 	lw	$a1, 8($sp)
-	lwc1	$f0, 8($a1)
+	lwc1	$f0, 4($a1)
 	lw	$a2, 12($sp)
 	swc1	$f0, 32($sp)
 	add	$a0, $zero, $a2
@@ -3457,9 +3448,9 @@ bne_else.8737:
 	lwc1	$f1, 32($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 16($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	lw	$a1, 8($sp)
-	lwc1	$f0, 16($a1)
+	lwc1	$f0, 8($a1)
 	lw	$a2, 12($sp)
 	swc1	$f0, 40($sp)
 	add	$a0, $zero, $a2
@@ -3471,7 +3462,7 @@ bne_else.8737:
 	lwc1	$f1, 40($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 16($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	lw	$a1, 20($sp)
 	addi	$s1, $zero, 2
 	bne	$a1, $s1, beq_else.8739
@@ -3484,24 +3475,23 @@ bne_else.8737:
 	lw	$ra, 52($sp)
 	lw	$a1, 16($sp)
 	lwc1	$f0, 0($a1)
-	lwc1	$f1, 8($a1)
-	lwc1	$f2, 16($a1)
+	lwc1	$f1, 4($a1)
+	lwc1	$f2, 8($a1)
 	sw	$ra, 52($sp)
 	addi	$sp, $sp, 56
 	jal	veciprod2.2496
 	addi	$sp, $sp, -56
 	lw	$ra, 52($sp)
 	lw	$a0, 16($sp)
-	swc1	$f0, 24($a0)
+	swc1	$f0, 12($a0)
 	j	beq_cont.8740
 beq_else.8739:
-	slti	$s0, $a1, 3
+	addi	$a2, $zero, 2
+	slt	$s0, $a2, $a1
 	beq	$s0, $zero, bne_else.8741
-	j	bne_cont.8742
-bne_else.8741:
 	lwc1	$f0, 0($a0)
-	lwc1	$f1, 8($a0)
-	lwc1	$f2, 16($a0)
+	lwc1	$f1, 4($a0)
+	lwc1	$f2, 8($a0)
 	lw	$a2, 12($sp)
 	add	$a0, $zero, $a2
 	sw	$ra, 52($sp)
@@ -3520,7 +3510,9 @@ bne_else.8741:
 beq_else.8743:
 beq_cont.8744:
 	lw	$a0, 16($sp)
-	swc1	$f0, 24($a0)
+	swc1	$f0, 12($a0)
+	j	bne_cont.8742
+bne_else.8741:
 bne_cont.8742:
 beq_cont.8740:
 	lw	$a0, 4($sp)
@@ -3784,7 +3776,7 @@ check_all_inside.2735:
 	jr	$ra
 bne_else.8761:
 	sll	$a3, $a3, 2
-	add	$s1, $a2, $a2
+	add	$s1, $a2, $a3
 	lw	$a2, 0($s1)
 	swc1	$f2, 0($sp)
 	swc1	$f1, 8($sp)
@@ -3897,13 +3889,13 @@ bne_else.8768:
 	lw	$a1, 4($sp)
 	lwc1	$f2, 0($a1)
 	add.s	$f1, $f1, $f2
-	lwc1	$f2, 8($a0)
+	lwc1	$f2, 4($a0)
 	mul.s	$f2, $f2, $f0
-	lwc1	$f3, 8($a1)
+	lwc1	$f3, 4($a1)
 	add.s	$f2, $f2, $f3
-	lwc1	$f3, 16($a0)
+	lwc1	$f3, 8($a0)
 	mul.s	$f0, $f3, $f0
-	lwc1	$f3, 16($a1)
+	lwc1	$f3, 8($a1)
 	add.s	$f0, $f0, $f3
 	addi	$a0, $zero, 0
 	lw	$a1, 12($sp)
@@ -3943,7 +3935,7 @@ shadow_check_one_or_group.2744:
 	jr	$ra
 bne_else.8772:
 	sll	$t0, $t0, 2
-	add	$s1, $a3, $a3
+	add	$s1, $a3, $t0
 	lw	$a3, 0($s1)
 	addi	$t0, $zero, 0
 	sw	$a1, 0($sp)
@@ -4169,13 +4161,13 @@ beq_else.8797:
 	lw	$a1, 16($sp)
 	lwc1	$f2, 0($a1)
 	add.s	$f1, $f1, $f2
-	lwc1	$f2, 8($a0)
+	lwc1	$f2, 4($a0)
 	mul.s	$f2, $f2, $f0
-	lwc1	$f3, 8($a1)
+	lwc1	$f3, 4($a1)
 	add.s	$f2, $f2, $f3
-	lwc1	$f3, 16($a0)
+	lwc1	$f3, 8($a0)
 	mul.s	$f3, $f3, $f0
-	lwc1	$f4, 16($a1)
+	lwc1	$f4, 8($a1)
 	add.s	$f3, $f3, $f4
 	addi	$a1, $zero, 0
 	lw	$a2, 32($sp)
@@ -4240,7 +4232,7 @@ solve_one_or_network.2754:
 	jr	$ra
 bne_else.8802:
 	sll	$t1, $t1, 2
-	add	$s1, $t0, $t0
+	add	$s1, $t0, $t1
 	lw	$t0, 0($s1)
 	addi	$t1, $zero, 0
 	sw	$a2, 0($sp)
@@ -4392,6 +4384,7 @@ bne_else.8818:
 	mtc1	$s1, $f1
 	lwc1	$f0, 8($sp)
 	c.lt.s	$a0, $a0, $a1
+	jr	$ra
 solve_each_element_fast.2764:
 	lw	$a3, 36($s7)
 	lw	$t0, 32($s7)
@@ -4496,13 +4489,13 @@ beq_else.8827:
 	lw	$a1, 16($sp)
 	lwc1	$f2, 0($a1)
 	add.s	$f1, $f1, $f2
-	lwc1	$f2, 8($a0)
+	lwc1	$f2, 4($a0)
 	mul.s	$f2, $f2, $f0
-	lwc1	$f3, 8($a1)
+	lwc1	$f3, 4($a1)
 	add.s	$f2, $f2, $f3
-	lwc1	$f3, 16($a0)
+	lwc1	$f3, 8($a0)
 	mul.s	$f3, $f3, $f0
-	lwc1	$f4, 16($a1)
+	lwc1	$f4, 8($a1)
 	add.s	$f3, $f3, $f4
 	addi	$a0, $zero, 0
 	lw	$a1, 44($sp)
@@ -4565,7 +4558,7 @@ solve_one_or_network_fast.2768:
 	jr	$ra
 bne_else.8832:
 	sll	$t1, $t1, 2
-	add	$s1, $t0, $t0
+	add	$s1, $t0, $t1
 	lw	$t0, 0($s1)
 	addi	$t1, $zero, 0
 	sw	$a2, 0($sp)
@@ -4715,6 +4708,7 @@ bne_else.8848:
 	mtc1	$s1, $f1
 	lwc1	$f0, 8($sp)
 	c.lt.s	$a0, $a0, $a1
+	jr	$ra
 get_nvector_rect.2778:
 	lw	$a1, 8($s7)
 	lw	$a2, 4($s7)
@@ -4731,9 +4725,9 @@ get_nvector_rect.2778:
 	lw	$a0, 8($sp)
 	addi	$a1, $a0, -1
 	addi	$a0, $a0, -1
-	sll	$a0, $a0, 3
+	sll	$a0, $a0, 2
 	lw	$a2, 4($sp)
-	add	$s1, $a2, $f0
+	add	$s1, $a2, $a0
 	lwc1	$f0, 0($s1)
 	sw	$a1, 12($sp)
 	sw	$ra, 20($sp)
@@ -4743,9 +4737,9 @@ get_nvector_rect.2778:
 	lw	$ra, 20($sp)
 	sub.s	$f0, $fzero, $f0
 	lw	$a0, 12($sp)
-	sll	$a0, $a0, 3
+	sll	$a0, $a0, 2
 	lw	$a1, 0($sp)
-	add	$s1, $a1, $f0
+	add	$s1, $a1, $a0
 	swc1	$f0, 0($s1)
 	jr	$ra
 get_nvector_plane.2780:
@@ -4769,7 +4763,7 @@ get_nvector_plane.2780:
 	lw	$ra, 12($sp)
 	sub.s	$f0, $fzero, $f0
 	lw	$a0, 4($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	lw	$a1, 0($sp)
 	add	$a0, $zero, $a1
 	sw	$ra, 12($sp)
@@ -4779,7 +4773,7 @@ get_nvector_plane.2780:
 	lw	$ra, 12($sp)
 	sub.s	$f0, $fzero, $f0
 	lw	$a0, 4($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	jr	$ra
 get_nvector_second.2782:
 	lw	$a1, 8($s7)
@@ -4797,7 +4791,7 @@ get_nvector_second.2782:
 	lwc1	$f1, 16($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 8($sp)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	lw	$a1, 4($sp)
 	swc1	$f0, 24($sp)
 	swc1	$f1, 32($sp)
@@ -4810,7 +4804,7 @@ get_nvector_second.2782:
 	lwc1	$f1, 32($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 8($sp)
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	lw	$a0, 4($sp)
 	swc1	$f0, 40($sp)
 	swc1	$f1, 48($sp)
@@ -4860,9 +4854,9 @@ get_nvector_second.2782:
 	lwc1	$f0, 64($sp)
 	swc1	$f0, 0($a0)
 	lwc1	$f0, 72($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	lwc1	$f0, 80($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	j	beq_cont.8853
 beq_else.8852:
 	lw	$a0, 4($sp)
@@ -4917,7 +4911,7 @@ beq_else.8852:
 	lwc1	$f1, 72($sp)
 	add.s	$f0, $f1, $f0
 	lw	$a0, 0($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	lw	$a1, 4($sp)
 	add	$a0, $zero, $a1
 	sw	$ra, 108($sp)
@@ -4944,7 +4938,7 @@ beq_else.8852:
 	lwc1	$f1, 80($sp)
 	add.s	$f0, $f1, $f0
 	lw	$a0, 0($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 beq_cont.8853:
 	lw	$a1, 4($sp)
 	add	$a0, $zero, $a1
@@ -5016,7 +5010,7 @@ utexture.2787:
 	addi	$sp, $sp, -24
 	lw	$ra, 20($sp)
 	lw	$a0, 4($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	lw	$a1, 8($sp)
 	add	$a0, $zero, $a1
 	sw	$ra, 20($sp)
@@ -5025,7 +5019,7 @@ utexture.2787:
 	addi	$sp, $sp, -24
 	lw	$ra, 20($sp)
 	lw	$a0, 4($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	lw	$a1, 12($sp)
 	addi	$s1, $zero, 1
 	bne	$a1, $s1, bne_else.8856
@@ -5059,7 +5053,7 @@ utexture.2787:
 	mtc1	$s1, $f1
 	c.lt.s	$a0, $a0, $a1
 	lw	$a1, 0($sp)
-	lwc1	$f0, 16($a1)
+	lwc1	$f0, 8($a1)
 	lw	$a1, 8($sp)
 	sw	$a0, 32($sp)
 	swc1	$f0, 40($sp)
@@ -5114,13 +5108,13 @@ beq_else.8862:
 beq_cont.8863:
 beq_cont.8859:
 	lw	$a0, 4($sp)
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	jr	$ra
 bne_else.8856:
 	addi	$s1, $zero, 2
 	bne	$a1, $s1, bne_else.8865
 	lw	$a1, 0($sp)
-	lwc1	$f0, 8($a1)
+	lwc1	$f0, 4($a1)
 	lui	$s1, 16000
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f1
@@ -5145,7 +5139,7 @@ bne_else.8856:
 	mtc1	$s1, $f2
 	sub.s	$f0, $f2, $f0
 	mul.s	$f0, $f1, $f0
-	swc1	$f0, 8($a0)
+	swc1	$f0, 4($a0)
 	jr	$ra
 bne_else.8865:
 	addi	$s1, $zero, 3
@@ -5163,7 +5157,7 @@ bne_else.8865:
 	lwc1	$f1, 56($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 0($sp)
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	lw	$a0, 8($sp)
 	swc1	$f0, 64($sp)
 	swc1	$f1, 72($sp)
@@ -5208,7 +5202,7 @@ bne_else.8865:
 	mtc1	$s1, $f1
 	mul.s	$f1, $f0, $f1
 	lw	$a0, 4($sp)
-	swc1	$f1, 8($a0)
+	swc1	$f1, 4($a0)
 	lui	$s1, 16256
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f1
@@ -5217,7 +5211,7 @@ bne_else.8865:
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f1
 	mul.s	$f0, $f0, $f1
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	jr	$ra
 bne_else.8867:
 	addi	$s1, $zero, 4
@@ -5245,7 +5239,7 @@ bne_else.8867:
 	lwc1	$f1, 112($sp)
 	mul.s	$f0, $f1, $f0
 	lw	$a0, 0($sp)
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	lw	$a1, 8($sp)
 	swc1	$f0, 120($sp)
 	swc1	$f1, 128($sp)
@@ -5322,7 +5316,7 @@ beq_cont.8871:
 	lwc1	$f1, 168($sp)
 	sub.s	$f0, $f1, $f0
 	lw	$a0, 0($sp)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	lw	$a0, 8($sp)
 	swc1	$f0, 176($sp)
 	swc1	$f1, 184($sp)
@@ -5430,7 +5424,7 @@ beq_cont.8875:
 	mtc1	$s1, $f1
 	div.s	$f0, $f0, $f1
 	lw	$a0, 4($sp)
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	jr	$ra
 bne_else.8869:
 	jr	$ra
@@ -5469,12 +5463,12 @@ bne_else.8880:
 	lwc1	$f1, 0($a0)
 	add.s	$f1, $f1, $f0
 	swc1	$f1, 0($a0)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	add.s	$f1, $f1, $f0
-	swc1	$f1, 8($a0)
-	lwc1	$f1, 16($a0)
+	swc1	$f1, 4($a0)
+	lwc1	$f1, 8($a0)
 	add.s	$f0, $f1, $f0
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	jr	$ra
 trace_reflections.2794:
 	lw	$a2, 32($s7)
@@ -5490,7 +5484,7 @@ trace_reflections.2794:
 	jr	$ra
 bne_else.8883:
 	sll	$t6, $a0, 2
-	add	$s1, $a3, $a3
+	add	$s1, $a3, $t6
 	lw	$a3, 0($s1)
 	sw	$s7, 0($sp)
 	sw	$a0, 4($sp)
@@ -5644,8 +5638,11 @@ trace_ray.2799:
 	lw	$s3, 12($s7)
 	lw	$s4, 8($s7)
 	lw	$s5, 4($s7)
-	slti	$s0, $a0, 5
+	addi	$s6, $zero, 4
+	slt	$s0, $s6, $a0
 	beq	$s0, $zero, bne_else.8895
+	jr	$ra
+bne_else.8895:
 	sw	$s7, 0($sp)
 	swc1	$f1, 8($sp)
 	sw	$t1, 16($sp)
@@ -5685,22 +5682,22 @@ trace_ray.2799:
 	sw	$ra, 124($sp)
 	addi	$sp, $sp, 128
 	lw	$s6, 0($s7)
-	lahi	$ra, tmp.8898
-	lalo	$ra, tmp.8898
+	lahi	$ra, tmp.8899
+	lalo	$ra, tmp.8899
 	jr	$s6
-tmp.8898:
+tmp.8899:
 	addi	$sp, $sp, -128
 	lw	$ra, 124($sp)
-	bne	$a0, $zero, bne_else.8899
+	bne	$a0, $zero, bne_else.8900
 	addi	$a0, $zero, -1
 	lw	$a1, 108($sp)
 	sll	$a2, $a1, 2
 	lw	$a3, 120($sp)
-	add	$s1, $a3, $a0
+	add	$s1, $a3, $a2
 	sw	$a0, 0($s1)
-	bne	$a1, $zero, bne_else.8900
+	bne	$a1, $zero, bne_else.8901
 	jr	$ra
-bne_else.8900:
+bne_else.8901:
 	lw	$a0, 112($sp)
 	lw	$a1, 104($sp)
 	sw	$ra, 124($sp)
@@ -5711,9 +5708,9 @@ bne_else.8900:
 	sub.s	$f0, $fzero, $f0
 	swc1	$f0, 128($sp)
 	slt	$a0, $fzero, $f0
-	bne	$a0, $zero, bne_else.8903
+	bne	$a0, $zero, bne_else.8904
 	jr	$ra
-bne_else.8903:
+bne_else.8904:
 	lwc1	$f0, 128($sp)
 	sqrt	$f0, $f0
 	lwc1	$f1, 128($sp)
@@ -5727,14 +5724,14 @@ bne_else.8903:
 	lwc1	$f1, 0($a0)
 	add.s	$f1, $f1, $f0
 	swc1	$f1, 0($a0)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	add.s	$f1, $f1, $f0
-	swc1	$f1, 8($a0)
-	lwc1	$f1, 16($a0)
+	swc1	$f1, 4($a0)
+	lwc1	$f1, 8($a0)
 	add.s	$f0, $f1, $f0
-	swc1	$f0, 16($a0)
+	swc1	$f0, 8($a0)
 	jr	$ra
-bne_else.8899:
+bne_else.8900:
 	lw	$a0, 80($sp)
 	lw	$a0, 0($a0)
 	sll	$a1, $a0, 2
@@ -5766,10 +5763,10 @@ bne_else.8899:
 	sw	$ra, 164($sp)
 	addi	$sp, $sp, 168
 	lw	$s6, 0($s7)
-	lahi	$ra, tmp.8907
-	lalo	$ra, tmp.8907
+	lahi	$ra, tmp.8908
+	lalo	$ra, tmp.8908
 	jr	$s6
-tmp.8907:
+tmp.8908:
 	addi	$sp, $sp, -168
 	lw	$ra, 164($sp)
 	lw	$a0, 68($sp)
@@ -5785,10 +5782,10 @@ tmp.8907:
 	sw	$ra, 164($sp)
 	addi	$sp, $sp, 168
 	lw	$s6, 0($s7)
-	lahi	$ra, tmp.8908
-	lalo	$ra, tmp.8908
+	lahi	$ra, tmp.8909
+	lalo	$ra, tmp.8909
 	jr	$s6
-tmp.8908:
+tmp.8909:
 	addi	$sp, $sp, -168
 	lw	$ra, 164($sp)
 	lw	$a0, 136($sp)
@@ -5799,7 +5796,7 @@ tmp.8908:
 	lw	$a1, 108($sp)
 	sll	$a2, $a1, 2
 	lw	$a3, 120($sp)
-	add	$s1, $a3, $a0
+	add	$s1, $a3, $a2
 	sw	$a0, 0($s1)
 	lw	$a0, 52($sp)
 	sw	$ra, 164($sp)
@@ -5809,7 +5806,7 @@ tmp.8908:
 	lw	$ra, 164($sp)
 	lw	$a1, 108($sp)
 	sll	$a2, $a1, 2
-	add	$s1, $a0, $a0
+	add	$s1, $a0, $a2
 	lw	$a0, 0($s1)
 	lw	$a2, 64($sp)
 	add	$a1, $zero, $a2
@@ -5836,12 +5833,12 @@ tmp.8908:
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f1
 	c.lt.s	$a0, $a0, $a1
-	bne	$a0, $zero, beq_else.8909
+	bne	$a0, $zero, beq_else.8910
 	addi	$a0, $zero, 1
 	lw	$a1, 108($sp)
 	sll	$a2, $a1, 2
 	lw	$a3, 160($sp)
-	add	$s1, $a3, $a0
+	add	$s1, $a3, $a2
 	sw	$a0, 0($s1)
 	lw	$a0, 52($sp)
 	sw	$ra, 164($sp)
@@ -5886,7 +5883,7 @@ tmp.8908:
 	lw	$ra, 172($sp)
 	lw	$a1, 108($sp)
 	sll	$a2, $a1, 2
-	add	$s1, $a0, $a0
+	add	$s1, $a0, $a2
 	lw	$a0, 0($s1)
 	lw	$a2, 44($sp)
 	add	$a1, $zero, $a2
@@ -5895,15 +5892,15 @@ tmp.8908:
 	jal	veccpy.2482
 	addi	$sp, $sp, -176
 	lw	$ra, 172($sp)
-	j	beq_cont.8910
-beq_else.8909:
+	j	beq_cont.8911
+beq_else.8910:
 	addi	$a0, $zero, 0
 	lw	$a1, 108($sp)
 	sll	$a2, $a1, 2
 	lw	$a3, 160($sp)
-	add	$s1, $a3, $a0
+	add	$s1, $a3, $a2
 	sw	$a0, 0($s1)
-beq_cont.8910:
+beq_cont.8911:
 	lui	$s1, -16384
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f0
@@ -5940,13 +5937,13 @@ beq_cont.8910:
 	sw	$ra, 188($sp)
 	addi	$sp, $sp, 192
 	lw	$s6, 0($s7)
-	lahi	$ra, tmp.8911
-	lalo	$ra, tmp.8911
+	lahi	$ra, tmp.8912
+	lalo	$ra, tmp.8912
 	jr	$s6
-tmp.8911:
+tmp.8912:
 	addi	$sp, $sp, -192
 	lw	$ra, 188($sp)
-	bne	$a0, $zero, beq_else.8912
+	bne	$a0, $zero, beq_else.8913
 	lw	$a0, 44($sp)
 	lw	$a1, 104($sp)
 	sw	$ra, 188($sp)
@@ -5972,24 +5969,24 @@ tmp.8911:
 	sw	$ra, 196($sp)
 	addi	$sp, $sp, 200
 	lw	$s6, 0($s7)
-	lahi	$ra, tmp.8914
-	lalo	$ra, tmp.8914
+	lahi	$ra, tmp.8915
+	lalo	$ra, tmp.8915
 	jr	$s6
-tmp.8914:
+tmp.8915:
 	addi	$sp, $sp, -200
 	lw	$ra, 196($sp)
-	j	beq_cont.8913
-beq_else.8912:
-beq_cont.8913:
+	j	beq_cont.8914
+beq_else.8913:
+beq_cont.8914:
 	lw	$a0, 64($sp)
 	lw	$s7, 28($sp)
 	sw	$ra, 196($sp)
 	addi	$sp, $sp, 200
 	lw	$s6, 0($s7)
-	lahi	$ra, tmp.8915
-	lalo	$ra, tmp.8915
+	lahi	$ra, tmp.8916
+	lalo	$ra, tmp.8916
 	jr	$s6
-tmp.8915:
+tmp.8916:
 	addi	$sp, $sp, -200
 	lw	$ra, 196($sp)
 	lw	$a0, 24($sp)
@@ -6002,10 +5999,10 @@ tmp.8915:
 	sw	$ra, 196($sp)
 	addi	$sp, $sp, 200
 	lw	$s6, 0($s7)
-	lahi	$ra, tmp.8916
-	lalo	$ra, tmp.8916
+	lahi	$ra, tmp.8917
+	lalo	$ra, tmp.8917
 	jr	$s6
-tmp.8916:
+tmp.8917:
 	addi	$sp, $sp, -200
 	lw	$ra, 196($sp)
 	lui	$s1, 15820
@@ -6013,24 +6010,24 @@ tmp.8916:
 	mtc1	$s1, $f0
 	lwc1	$f1, 96($sp)
 	c.lt.s	$a0, $a0, $a1
-	bne	$a0, $zero, bne_else.8917
+	bne	$a0, $zero, bne_else.8918
 	jr	$ra
-bne_else.8917:
+bne_else.8918:
 	lw	$a0, 108($sp)
 	slti	$s0, $a0, 4
-	beq	$s0, $zero, bne_else.8919
+	beq	$s0, $zero, bne_else.8920
 	addi	$a1, $a0, 1
 	addi	$a2, $zero, -1
 	sll	$a1, $a1, 2
 	lw	$a3, 120($sp)
-	add	$s1, $a3, $a2
+	add	$s1, $a3, $a1
 	sw	$a2, 0($s1)
-	j	bne_cont.8920
-bne_else.8919:
-bne_cont.8920:
+	j	bne_cont.8921
+bne_else.8920:
+bne_cont.8921:
 	lw	$a1, 144($sp)
 	addi	$s1, $zero, 2
-	bne	$a1, $s1, bne_else.8921
+	bne	$a1, $s1, bne_else.8922
 	lui	$s1, 16256
 	ori	$s1, $s1, 0
 	mtc1	$s1, $f0
@@ -6057,9 +6054,7 @@ bne_cont.8920:
 	lw	$s7, 0($sp)
 	lw	$s6, 0($s7)
 	jr	$s6
-bne_else.8921:
-	jr	$ra
-bne_else.8895:
+bne_else.8922:
 	jr	$ra
 trace_diffuse_ray.2805:
 	lw	$a1, 48($s7)
@@ -6482,7 +6477,7 @@ tmp.8956:
 	lw	$a0, 12($sp)
 	sll	$a0, $a0, 2
 	lw	$a1, 32($sp)
-	add	$s1, $a1, $a1
+	add	$s1, $a1, $a0
 	lw	$a1, 0($s1)
 	lw	$a0, 0($sp)
 	lw	$a2, 8($sp)
@@ -6491,7 +6486,7 @@ calc_diffuse_using_5points.2824:
 	lw	$t1, 8($s7)
 	lw	$t2, 4($s7)
 	sll	$t3, $a0, 2
-	add	$s1, $a1, $a1
+	add	$s1, $a1, $t3
 	lw	$a1, 0($s1)
 	sw	$t1, 0($sp)
 	sw	$t2, 4($sp)
@@ -6636,8 +6631,11 @@ calc_diffuse_using_5points.2824:
 	j	vecaccumv.2514
 do_without_neighbors.2830:
 	lw	$a2, 4($s7)
-	slti	$s0, $a1, 5
+	addi	$a3, $zero, 4
+	slt	$s0, $a3, $a1
 	beq	$s0, $zero, bne_else.8957
+	jr	$ra
+bne_else.8957:
 	sw	$s7, 0($sp)
 	sw	$a2, 4($sp)
 	sw	$a0, 8($sp)
@@ -6649,12 +6647,12 @@ do_without_neighbors.2830:
 	lw	$ra, 20($sp)
 	lw	$a1, 12($sp)
 	sll	$a2, $a1, 2
-	add	$s1, $a0, $a0
+	add	$s1, $a0, $a2
 	lw	$a0, 0($s1)
 	slti	$s0, $a0, 0
-	beq	$s0, $zero, bne_else.8958
+	beq	$s0, $zero, bne_else.8959
 	jr	$ra
-bne_else.8958:
+bne_else.8959:
 	lw	$a0, 8($sp)
 	sw	$ra, 20($sp)
 	addi	$sp, $sp, 24
@@ -6663,54 +6661,54 @@ bne_else.8958:
 	lw	$ra, 20($sp)
 	lw	$a1, 12($sp)
 	sll	$a2, $a1, 2
-	add	$s1, $a0, $a0
+	add	$s1, $a0, $a2
 	lw	$a0, 0($s1)
-	bne	$a0, $zero, beq_else.8960
-	j	beq_cont.8961
-beq_else.8960:
+	bne	$a0, $zero, beq_else.8961
+	j	beq_cont.8962
+beq_else.8961:
 	lw	$a0, 8($sp)
 	lw	$s7, 4($sp)
 	sw	$ra, 20($sp)
 	addi	$sp, $sp, 24
 	lw	$s6, 0($s7)
-	lahi	$ra, tmp.8962
-	lalo	$ra, tmp.8962
+	lahi	$ra, tmp.8963
+	lalo	$ra, tmp.8963
 	jr	$s6
-tmp.8962:
+tmp.8963:
 	addi	$sp, $sp, -24
 	lw	$ra, 20($sp)
-beq_cont.8961:
+beq_cont.8962:
 	lw	$a0, 12($sp)
 	addi	$a1, $a0, 1
 	lw	$a0, 8($sp)
 	lw	$s7, 0($sp)
 	lw	$s6, 0($s7)
 	jr	$s6
-bne_else.8957:
-	jr	$ra
 neighbors_exist.2833:
 	lw	$a2, 4($s7)
 	lw	$a3, 4($a2)
 	addi	$t0, $a1, 1
 	slt	$s0, $t0, $a3
 	beq	$s0, $zero, bne_else.8964
-	slti	$s0, $a1, 1
+	addi	$a3, $zero, 0
+	slt	$s0, $a3, $a1
 	beq	$s0, $zero, bne_else.8965
-	addi	$a0, $zero, 0
-	jr	$ra
-bne_else.8965:
 	lw	$a1, 0($a2)
 	addi	$a2, $a0, 1
 	slt	$s0, $a2, $a1
 	beq	$s0, $zero, bne_else.8966
-	slti	$s0, $a0, 1
+	addi	$a1, $zero, 0
+	slt	$s0, $a1, $a0
 	beq	$s0, $zero, bne_else.8967
-	addi	$a0, $zero, 0
-	jr	$ra
-bne_else.8967:
 	addi	$a0, $zero, 1
 	jr	$ra
+bne_else.8967:
+	addi	$a0, $zero, 0
+	jr	$ra
 bne_else.8966:
+	addi	$a0, $zero, 0
+	jr	$ra
+bne_else.8965:
 	addi	$a0, $zero, 0
 	jr	$ra
 bne_else.8964:
@@ -6725,7 +6723,7 @@ get_surface_id.2837:
 	lw	$ra, 4($sp)
 	lw	$a1, 0($sp)
 	sll	$a1, $a1, 2
-	add	$s1, $a0, $a0
+	add	$s1, $a0, $a1
 	lw	$a0, 0($s1)
 	jr	$ra
 neighbors_are_available.2840:
@@ -6826,8 +6824,11 @@ try_exploit_neighbors.2846:
 	sll	$t4, $a0, 2
 	add	$s1, $a3, $t4
 	lw	$t4, 0($s1)
-	slti	$s0, $t1, 5
+	addi	$t5, $zero, 4
+	slt	$s0, $t5, $t1
 	beq	$s0, $zero, bne_else.8972
+	jr	$ra
+bne_else.8972:
 	sw	$a1, 0($sp)
 	sw	$s7, 4($sp)
 	sw	$t3, 8($sp)
@@ -6846,9 +6847,9 @@ try_exploit_neighbors.2846:
 	addi	$sp, $sp, -48
 	lw	$ra, 44($sp)
 	slti	$s0, $a0, 0
-	beq	$s0, $zero, bne_else.8973
+	beq	$s0, $zero, bne_else.8974
 	jr	$ra
-bne_else.8973:
+bne_else.8974:
 	lw	$a0, 36($sp)
 	lw	$a1, 32($sp)
 	lw	$a2, 28($sp)
@@ -6859,7 +6860,7 @@ bne_else.8973:
 	jal	neighbors_are_available.2840
 	addi	$sp, $sp, -48
 	lw	$ra, 44($sp)
-	bne	$a0, $zero, bne_else.8975
+	bne	$a0, $zero, bne_else.8976
 	lw	$a0, 36($sp)
 	sll	$a0, $a0, 2
 	lw	$a1, 28($sp)
@@ -6869,7 +6870,7 @@ bne_else.8973:
 	lw	$s7, 16($sp)
 	lw	$s6, 0($s7)
 	jr	$s6
-bne_else.8975:
+bne_else.8976:
 	lw	$a0, 12($sp)
 	sw	$ra, 44($sp)
 	addi	$sp, $sp, 48
@@ -6878,11 +6879,11 @@ bne_else.8975:
 	lw	$ra, 44($sp)
 	lw	$t0, 20($sp)
 	sll	$a1, $t0, 2
-	add	$s1, $a0, $a0
+	add	$s1, $a0, $a1
 	lw	$a0, 0($s1)
-	bne	$a0, $zero, beq_else.8976
-	j	beq_cont.8977
-beq_else.8976:
+	bne	$a0, $zero, beq_else.8977
+	j	beq_cont.8978
+beq_else.8977:
 	lw	$a0, 36($sp)
 	lw	$a1, 32($sp)
 	lw	$a2, 28($sp)
@@ -6891,13 +6892,13 @@ beq_else.8976:
 	sw	$ra, 44($sp)
 	addi	$sp, $sp, 48
 	lw	$s6, 0($s7)
-	lahi	$ra, tmp.8978
-	lalo	$ra, tmp.8978
+	lahi	$ra, tmp.8979
+	lalo	$ra, tmp.8979
 	jr	$s6
-tmp.8978:
+tmp.8979:
 	addi	$sp, $sp, -48
 	lw	$ra, 44($sp)
-beq_cont.8977:
+beq_cont.8978:
 	lw	$a0, 20($sp)
 	addi	$t1, $a0, 1
 	lw	$a0, 36($sp)
@@ -6908,15 +6909,13 @@ beq_cont.8977:
 	lw	$s7, 4($sp)
 	lw	$s6, 0($s7)
 	jr	$s6
-bne_else.8972:
-	jr	$ra
 write_ppm_header.2853:
 	lw	$a0, 4($s7)
 	addi	$a1, $zero, 80
 	sw	$a0, 0($sp)
 	add	$a0, $zero, $a1
 	outc	$a0
-	addi	$a0, $zero, 51
+	addi	$a0, $zero, 54
 	outc	$a0
 	addi	$a0, $zero, 10
 	outc	$a0
@@ -6935,25 +6934,37 @@ write_ppm_header.2853:
 	outi	$a0
 	addi	$a0, $zero, 10
 	outc	$a0
+	jr	$ra
 write_rgb_element.2855:
 	ftoi	$a0, $f0
-	slti	$s0, $a0, 256
+	addi	$a1, $zero, 255
+	slt	$s0, $a1, $a0
 	beq	$s0, $zero, bne_else.8980
+	addi	$a0, $zero, 255
+	j	bne_cont.8981
+bne_else.8980:
 	slti	$s0, $a0, 0
 	beq	$s0, $zero, bne_else.8982
 	addi	$a0, $zero, 0
 	j	bne_cont.8983
 bne_else.8982:
 bne_cont.8983:
-	j	bne_cont.8981
-bne_else.8980:
-	addi	$a0, $zero, 255
 bne_cont.8981:
 	outi	$a0
+	jr	$ra
 write_rgb.2857:
 	lw	$a0, 4($s7)
 	lwc1	$f0, 0($a0)
 	sw	$a0, 0($sp)
+	sw	$ra, 4($sp)
+	addi	$sp, $sp, 8
+	jal	write_rgb_element.2855
+	addi	$sp, $sp, -8
+	lw	$ra, 4($sp)
+	addi	$a0, $zero, 32
+	outc	$a0
+	lw	$a0, 0($sp)
+	lwc1	$f0, 4($a0)
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
 	jal	write_rgb_element.2855
@@ -6968,23 +6979,18 @@ write_rgb.2857:
 	jal	write_rgb_element.2855
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
-	addi	$a0, $zero, 32
-	outc	$a0
-	lw	$a0, 0($sp)
-	lwc1	$f0, 16($a0)
-	sw	$ra, 4($sp)
-	addi	$sp, $sp, 8
-	jal	write_rgb_element.2855
-	addi	$sp, $sp, -8
-	lw	$ra, 4($sp)
 	addi	$a0, $zero, 10
 	outc	$a0
+	jr	$ra
 pretrace_diffuse_rays.2859:
 	lw	$a2, 12($s7)
 	lw	$a3, 8($s7)
 	lw	$t0, 4($s7)
-	slti	$s0, $a1, 5
+	addi	$t1, $zero, 4
+	slt	$s0, $t1, $a1
 	beq	$s0, $zero, bne_else.8984
+	jr	$ra
+bne_else.8984:
 	sw	$s7, 0($sp)
 	sw	$a2, 4($sp)
 	sw	$a3, 8($sp)
@@ -6997,9 +7003,9 @@ pretrace_diffuse_rays.2859:
 	addi	$sp, $sp, -32
 	lw	$ra, 28($sp)
 	slti	$s0, $a0, 0
-	beq	$s0, $zero, bne_else.8985
+	beq	$s0, $zero, bne_else.8986
 	jr	$ra
-bne_else.8985:
+bne_else.8986:
 	lw	$a0, 20($sp)
 	sw	$ra, 28($sp)
 	addi	$sp, $sp, 32
@@ -7008,11 +7014,11 @@ bne_else.8985:
 	lw	$ra, 28($sp)
 	lw	$a1, 16($sp)
 	sll	$a2, $a1, 2
-	add	$s1, $a0, $a0
+	add	$s1, $a0, $a2
 	lw	$a0, 0($s1)
-	bne	$a0, $zero, beq_else.8987
-	j	beq_cont.8988
-beq_else.8987:
+	bne	$a0, $zero, beq_else.8988
+	j	beq_cont.8989
+beq_else.8988:
 	lw	$a0, 20($sp)
 	sw	$ra, 28($sp)
 	addi	$sp, $sp, 32
@@ -7052,7 +7058,7 @@ beq_else.8987:
 	add	$s1, $t0, $a3
 	lw	$a3, 0($s1)
 	sll	$t0, $a2, 2
-	add	$s1, $a0, $a0
+	add	$s1, $a0, $t0
 	lw	$a0, 0($s1)
 	lw	$s7, 4($sp)
 	add	$a2, $zero, $a0
@@ -7061,10 +7067,10 @@ beq_else.8987:
 	sw	$ra, 36($sp)
 	addi	$sp, $sp, 40
 	lw	$s6, 0($s7)
-	lahi	$ra, tmp.8989
-	lalo	$ra, tmp.8989
+	lahi	$ra, tmp.8990
+	lalo	$ra, tmp.8990
 	jr	$s6
-tmp.8989:
+tmp.8990:
 	addi	$sp, $sp, -40
 	lw	$ra, 36($sp)
 	lw	$a0, 20($sp)
@@ -7075,7 +7081,7 @@ tmp.8989:
 	lw	$ra, 36($sp)
 	lw	$a1, 16($sp)
 	sll	$a2, $a1, 2
-	add	$s1, $a0, $a0
+	add	$s1, $a0, $a2
 	lw	$a0, 0($s1)
 	lw	$a2, 12($sp)
 	add	$a1, $zero, $a2
@@ -7084,15 +7090,13 @@ tmp.8989:
 	jal	veccpy.2482
 	addi	$sp, $sp, -40
 	lw	$ra, 36($sp)
-beq_cont.8988:
+beq_cont.8989:
 	lw	$a0, 16($sp)
 	addi	$a1, $a0, 1
 	lw	$a0, 20($sp)
 	lw	$s7, 0($sp)
 	lw	$s6, 0($s7)
 	jr	$s6
-bne_else.8984:
-	jr	$ra
 pretrace_pixels.2862:
 	lw	$a3, 36($s7)
 	lw	$t0, 32($s7)
@@ -7136,16 +7140,16 @@ bne_else.8991:
 	add.s	$f1, $f1, $f2
 	lw	$a1, 56($sp)
 	swc1	$f1, 0($a1)
-	lwc1	$f1, 8($a0)
+	lwc1	$f1, 4($a0)
 	mul.s	$f1, $f0, $f1
 	lwc1	$f3, 48($sp)
 	add.s	$f1, $f1, $f3
-	swc1	$f1, 8($a1)
-	lwc1	$f1, 16($a0)
+	swc1	$f1, 4($a1)
+	lwc1	$f1, 8($a0)
 	mul.s	$f0, $f0, $f1
 	lwc1	$f1, 40($sp)
 	add.s	$f0, $f0, $f1
-	swc1	$f0, 16($a1)
+	swc1	$f0, 8($a1)
 	addi	$a0, $zero, 0
 	add	$s6, $zero, $a1
 	add	$a1, $zero, $a0
@@ -7287,13 +7291,13 @@ pretrace_line.2869:
 	lw	$a1, 16($sp)
 	lwc1	$f2, 0($a1)
 	add.s	$f1, $f1, $f2
-	lwc1	$f2, 8($a0)
+	lwc1	$f2, 4($a0)
 	mul.s	$f2, $f0, $f2
-	lwc1	$f3, 8($a1)
+	lwc1	$f3, 4($a1)
 	add.s	$f2, $f2, $f3
-	lwc1	$f3, 16($a0)
+	lwc1	$f3, 8($a0)
 	mul.s	$f0, $f0, $f3
-	lwc1	$f3, 16($a1)
+	lwc1	$f3, 8($a1)
 	add.s	$f0, $f0, $f3
 	lw	$a0, 12($sp)
 	lw	$a0, 0($a0)
@@ -7650,7 +7654,7 @@ bne_else.9012:
 	lw	$a1, 4($sp)
 	sll	$a2, $a1, 2
 	lw	$a3, 0($sp)
-	add	$s1, $a3, $a0
+	add	$s1, $a3, $a2
 	sw	$a0, 0($s1)
 	addi	$a1, $a1, -1
 	add	$a0, $zero, $a3
@@ -8111,7 +8115,7 @@ tmp.9026:
 	lw	$a1, 8($sp)
 	sll	$a2, $a1, 2
 	lw	$a3, 4($sp)
-	add	$s1, $a3, $a0
+	add	$s1, $a3, $a2
 	sw	$a0, 0($s1)
 	addi	$a1, $a1, -1
 	lw	$s7, 0($sp)
@@ -8152,7 +8156,7 @@ tmp.9029:
 	lw	$a1, 12($sp)
 	sll	$a2, $a1, 2
 	lw	$a3, 8($sp)
-	add	$s1, $a3, $a0
+	add	$s1, $a3, $a2
 	sw	$a0, 0($s1)
 	sll	$a0, $a1, 2
 	add	$s1, $a3, $a0
@@ -8211,7 +8215,7 @@ init_vecset_constants.2926:
 	jr	$ra
 bne_else.9034:
 	sll	$a3, $a0, 2
-	add	$s1, $a2, $a2
+	add	$s1, $a2, $a3
 	lw	$a2, 0($s1)
 	addi	$a3, $zero, 119
 	sw	$s7, 0($sp)
@@ -8325,7 +8329,7 @@ tmp.9042:
 	lw	$a1, 4($sp)
 	sll	$a1, $a1, 2
 	lw	$a2, 0($sp)
-	add	$s1, $a2, $a0
+	add	$s1, $a2, $a1
 	sw	$a0, 0($s1)
 	jr	$ra
 setup_rect_reflection.2937:
@@ -8354,9 +8358,9 @@ setup_rect_reflection.2937:
 	lw	$a0, 16($sp)
 	lwc1	$f1, 0($a0)
 	sub.s	$f1, $fzero, $f1
-	lwc1	$f2, 8($a0)
+	lwc1	$f2, 4($a0)
 	sub.s	$f2, $fzero, $f2
-	lwc1	$f3, 16($a0)
+	lwc1	$f3, 8($a0)
 	sub.s	$f3, $fzero, $f3
 	lw	$a1, 12($sp)
 	addi	$a2, $a1, 1
@@ -8384,7 +8388,7 @@ tmp.9045:
 	lw	$a2, 12($sp)
 	addi	$a3, $a2, 2
 	lw	$t0, 16($sp)
-	lwc1	$f2, 8($t0)
+	lwc1	$f2, 4($t0)
 	lwc1	$f0, 56($sp)
 	lwc1	$f1, 48($sp)
 	lwc1	$f3, 40($sp)
@@ -8405,7 +8409,7 @@ tmp.9046:
 	lw	$a2, 12($sp)
 	addi	$a2, $a2, 3
 	lw	$a3, 16($sp)
-	lwc1	$f3, 16($a3)
+	lwc1	$f3, 8($a3)
 	lwc1	$f0, 56($sp)
 	lwc1	$f1, 48($sp)
 	lwc1	$f2, 32($sp)
@@ -8500,7 +8504,7 @@ setup_surface_reflection.2940:
 	lwc1	$f1, 40($sp)
 	mul.s	$f0, $f0, $f1
 	lw	$a0, 16($sp)
-	lwc1	$f2, 8($a0)
+	lwc1	$f2, 4($a0)
 	sub.s	$f0, $f0, $f2
 	lui	$s1, 16384
 	ori	$s1, $s1, 0
@@ -8519,7 +8523,7 @@ setup_surface_reflection.2940:
 	lwc1	$f1, 40($sp)
 	mul.s	$f0, $f0, $f1
 	lw	$a0, 16($sp)
-	lwc1	$f1, 16($a0)
+	lwc1	$f1, 8($a0)
 	sub.s	$f3, $f0, $f1
 	lwc1	$f0, 32($sp)
 	lwc1	$f1, 56($sp)
@@ -8550,7 +8554,7 @@ setup_reflections.2943:
 	jr	$ra
 bne_else.9051:
 	sll	$t0, $a0, 2
-	add	$s1, $a3, $a3
+	add	$s1, $a3, $t0
 	lw	$a3, 0($s1)
 	sw	$a1, 0($sp)
 	sw	$a0, 4($sp)

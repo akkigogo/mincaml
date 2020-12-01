@@ -61,10 +61,10 @@ let rec g env = function (* 式の仮想マシンコード生成 (caml2html: vir
       | Type.Bool | Type.Int -> Ans(IfEq(x, V(y), g env e1, g env e2))
       | Type.Float -> Ans(IfFEq(x, y, g env e1, g env e2))
       | _ -> failwith "equality supported only for bool, int, and float")
-  | Closure.IfLE(x, y, e1, e2) ->
+  | Closure.IfLT(x, y, e1, e2) ->
       (match M.find x env with
-      | Type.Bool | Type.Int -> Ans(IfLE(x, V(y), g env e1, g env e2))
-      | Type.Float -> Ans(IfFLE(x, y, g env e1, g env e2))
+      | Type.Bool | Type.Int -> Ans(IfLT(x, V(y), g env e1, g env e2))
+      | Type.Float -> Ans(IfFLT(x, y, g env e1, g env e2))      (* x <= y then e1 else e2 ---> if x > y then e2 else e1 ---> if y < x then e2 else e1  *)
       | _ -> failwith "inequality supported only for bool, int, and float")
   | Closure.Let((x, t1), e1, e2) ->
       let e1' = g env e1 in
@@ -125,7 +125,7 @@ let rec g env = function (* 式の仮想マシンコード生成 (caml2html: vir
       (match M.find x env with
       | Type.Array(Type.Unit) -> Ans(Nop)
       | Type.Array(Type.Float) ->
-          Let((offset, Type.Int), Slw(y, C(3)),
+          Let((offset, Type.Int), Slw(y, C(2)),
               Ans(Lfd(x, V(offset))))
       | Type.Array(_) ->
           Let((offset, Type.Int), Slw(y, C(2)),
@@ -136,7 +136,7 @@ let rec g env = function (* 式の仮想マシンコード生成 (caml2html: vir
       (match M.find x env with
       | Type.Array(Type.Unit) -> Ans(Nop)
       | Type.Array(Type.Float) ->
-          Let((offset, Type.Int), Slw(y, C(3)),
+          Let((offset, Type.Int), Slw(y, C(2)),
               Ans(Stfd(z, x, V(offset))))
       | Type.Array(_) ->
           Let((offset, Type.Int), Slw(y, C(2)),

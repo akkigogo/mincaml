@@ -305,14 +305,72 @@ min_caml_fabs:
 minus:
 	sub.s	$f0, $fzero, $f0
 	jr	$ra
+f.26:
+	addi	$a0, $zero, 12345
+	jr	$ra
+g.28:
+	addi	$a0, $a0, 1
+	jr	$ra
 _min_caml_start:
 	addi	$sp, $sp, 16384
 	addi	$gp, $gp, 32000
-	lui	$s1, 16256
-	ori	$s1, $s1, 0
-	mtc1	$s1, $f0
+	addi	$a0, $zero, 10
+	addi	$a1, $zero, 1
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	jal	min_caml_atan
+	jal	min_caml_create_array
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
+	sw	$a0, 0($sp)
+	sw	$ra, 4($sp)
+	addi	$sp, $sp, 8
+	jal	f.26
+	addi	$sp, $sp, -8
+	lw	$ra, 4($sp)
+	lui	$a1, 1
+	ori	$a1, $a1, 2354
+	lw	$a2, 0($sp)
+	lw	$a3, 0($a2)
+	add	$t0, $a3, $a3
+	add	$t1, $t0, $t0
+	add	$t2, $t1, $t1
+	add	$t3, $t2, $t2
+	add	$t4, $t3, $t3
+	add	$t5, $t4, $t4
+	add	$t6, $t5, $t5
+	add	$t7, $t6, $t6
+	add	$t8, $t7, $t7
+	add	$t9, $t8, $t8
+	add	$k0, $t9, $t9
+	add	$k1, $k0, $k0
+	add	$v0, $k1, $k1
+	add	$v1, $v0, $v0
+	add	$at, $v1, $v1
+	lw	$a2, 4($a2)
+	bne	$a2, $zero, beq_else.77
+	add	$a0, $zero, $a1
+	sw	$ra, 4($sp)
+	addi	$sp, $sp, 8
+	jal	g.28
+	addi	$sp, $sp, -8
+	lw	$ra, 4($sp)
+	j	beq_cont.78
+beq_else.77:
+	add	$a1, $a3, $t0
+	add	$a1, $a1, $t1
+	add	$a1, $a1, $t2
+	add	$a1, $a1, $t3
+	add	$a1, $a1, $t4
+	add	$a1, $a1, $t5
+	add	$a1, $a1, $t6
+	add	$a1, $a1, $t7
+	add	$a1, $a1, $t8
+	add	$a1, $a1, $t9
+	add	$a1, $a1, $k0
+	add	$a1, $a1, $k1
+	add	$a1, $a1, $v0
+	add	$a1, $a1, $v1
+	add	$a1, $a1, $at
+	add	$a0, $a1, $a0
+beq_cont.78:
+	outi	$a0
