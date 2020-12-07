@@ -79,7 +79,15 @@ kernel_cos:
 	mul.s	$f0, $f2, $f0
 	sub.s	$f0, $f1, $f0
 	jr	$ra
+minus_sin:
+	sw	$ra, 4($sp)
+	addi	$sp, $sp, 8
+	sub.s	$f0, $fzero, $f0
+	lahi	$ra, tmp.sin_148
+	lalo	$ra, tmp.sin_148
 min_caml_sin:
+	c.lt.s	$s0, $f0, $fzero
+	bne	$s0, $zero, minus_sin
 	lui	$s1, 16457
 	ori	$s1, $s1, 4059
 	mtc1	$s1, $f1
@@ -104,22 +112,28 @@ bne_else.sin_147:
 	j	kernel_sin
 bne_else.sin_146:
 	sub.s	$f0, $f1, $f0
-	lw	$s6, 0($s7)
-	jr	$s6
+	j	min_caml_sin
 	bne_else.sin_145:
 	sub.s	$f0, $f0, $f1
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	lw	$s6, 0($s7)
 	lahi	$ra, tmp.sin_148
 	lalo	$ra, tmp.sin_148
-	jr	$s6
+	j	min_caml_sin
 tmp.sin_148:
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
 	sub.s	$f0, $fzero, $f0
 	jr	$ra
+minus_cos:
+	sw	$ra, 4($sp)
+	addi	$sp, $sp, 8
+	sub.s	$f0, $fzero, $f0
+	lahi	$ra, tmp.cos_137
+	lalo	$ra, tmp.cos_137
 min_caml_cos:
+	c.lt.s	$s0, $f0, $fzero
+	bne	$s0, $zero, minus_cos
 	lui	$s1, 16457
 	ori	$s1, $s1, 4059
 	mtc1	$s1, $f1
@@ -146,10 +160,9 @@ bne_else.cos_135:
 	sub.s	$f0, $f1, $f0
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	lw	$s6, 0($s7)
 	lahi	$ra, tmp.cos_137
 	lalo	$ra, tmp.cos_137
-	jr	$s6
+	j	min_caml_cos
 tmp.cos_137:
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
@@ -159,15 +172,9 @@ bne_else.cos_134:
 	sub.s	$f0, $f0, $f1
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	lw	$s6, 0($s7)
-	lahi	$ra, tmp.cos_138
-	lalo	$ra, tmp.cos_138
-	jr	$s6
-tmp.cos_138:
-	addi	$sp, $sp, -8
-	lw	$ra, 4($sp)
-	sub.s	$f0, $fzero, $f0
-	jr	$ra
+	lahi	$ra, tmp.cos_137
+	lalo	$ra, tmp.cos_137
+	j	min_caml_cos
 kernel_atan:
 	lui	$s1, 16042
 	ori	$s1, $s1, 43679
@@ -321,6 +328,7 @@ iloop.54:
 	bne	$a0, $zero, bne_else.112
 	addi	$a0, $zero, 1
 	outi	$a0
+	jr	$ra
 bne_else.112:
 	sub.s	$f2, $f2, $f3
 	add.s	$f2, $f2, $f4
@@ -349,6 +357,7 @@ bne_else.112:
 	beq	$s0, $zero, bne_else.114
 	addi	$a0, $zero, 0
 	outi	$a0
+	jr	$ra
 bne_else.114:
 	lw	$a0, 8($sp)
 	addi	$a0, $a0, -1
@@ -433,8 +442,8 @@ yloop.40:
 bne_else.117:
 	jr	$ra
 _min_caml_start:
-	addi	$sp, $sp, 16384
-	addi	$gp, $gp, 32000
+	lui	$sp, 1
+	lui	$gp, 3
 	addi	$a0, $zero, 0
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8

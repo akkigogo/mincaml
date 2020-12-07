@@ -130,7 +130,18 @@ let rec g env e = (* 型推論(caml2html: typing_g) *)
         unify t (Type.Fun(List.map snd yts, g (M.add_list yts env) e1));
         g env e2
     | App(e, es) -> (* 関数適用の型推論 (caml2html: typing_app) *)
-        let t = Type.gentyp () in
+        let t = 
+          (  if e = Var ("cos") then Type.Float else
+            if e = Var ("sin") then Type.Float else
+            if e = Var ("atan") then Type.Float else
+            if e = Var ("read_float") then Type.Float else
+            if e = Var ("sqrt") then Type.Float else
+            if e = Var ("fsqr") then Type.Float else
+            if e = Var ("floor") then Type.Float else
+            if e = Var ("fhalf") then Type.Float else
+            if e = Var ("truncate") then Type.Float else
+            if e = Var ("float_of_int") then Type.Float else
+            Type.gentyp () )in
         unify (g env e) (Type.Fun(List.map (g env) es, t));
         t
     | Tuple(es) -> Type.Tuple(List.map (g env) es)

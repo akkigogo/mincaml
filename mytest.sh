@@ -1,3 +1,3 @@
 ./min-caml my-test
-./foo my-test
-./a.out ./my-test 0
+echo my-test | ./foo
+echo ./my-test 0 | ./simulator

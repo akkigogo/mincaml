@@ -264,7 +264,7 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
     let b = "c.eq" in
     let b_else = Id.genid (b ^ "_else") in
     let b_cont = Id.genid (b ^ "_cont") in
-    Printf.fprintf oc "\tc.eq\t%s, %s, %s\n" (reg x) (reg y) b_else;
+    Printf.fprintf oc "\tc.eq.s\t%s, %s, %s\n" (reg x) (reg y) b_else;
     let stackset_back = !stackset in
     g oc (dest, e2);
     let stackset1 = !stackset in
@@ -289,21 +289,26 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
       Printf.fprintf oc "\tjr\t%s\n" (reg reg_sw)
   | Tail, CallDir(Id.L(x), ys, zs) -> (* 末尾呼び出し 多分 ok *)
       g'_args oc [] ys zs;
-      if x = "min_caml_fsqr" then Printf.fprintf oc "\tsqrt\t$f0, $f0\n\tjr\t$ra\n" else
+      if x = "min_caml_fsqr" then Printf.fprintf oc "\tmul.s\t$f0, $f0, $f0\n\tjr\t$ra\n" else
       if x = "min_caml_sqrt" then Printf.fprintf oc "\tsqrt\t$f0, $f0\n\tjr\t$ra\n" else
       if x = "min_caml_floor" then Printf.fprintf oc "\tfloor\t$f0, $f0\n\tjr\t$ra\n" else
       if x = "min_caml_int_of_float" then Printf.fprintf oc "\tftoi\t$a0, $f0\n\tjr\t$ra\n" else
       if x = "min_caml_truncate" then Printf.fprintf oc "\tfloor\t$f0, $f0\n\tftoi\t$f0, $a0\n\tjr\t$ra\n" else
       if x = "min_caml_float_of_int" then Printf.fprintf oc "\titof\t$f0, $a0\n\tjr\t$ra\n" else
-      if x = "min_caml_fispos" then Printf.fprintf oc "\tslt\t$a0, $fzero, $f0\n\tjr\t$ra\n" else
-      if x = "min_caml_fisneg" then Printf.fprintf oc "\tslt\t$a0, $f0, $zero\n\tjr\t$ra\n" else
-      if x = "min_caml_fiszero" then (Printf.fprintf oc "\tslt\t$a0, $fzero, $f0\n";
-                                     Printf.fprintf oc "\tslt\t$s0, $f0, $fzero\n";
-                                     Printf.fprintf oc "\tadd\t$a0, $a0, $s0\n\tjr\t$ra\n") else
+      if x = "min_caml_fispos" then Printf.fprintf oc "\tc.lt.s\t$a0, $fzero, $f0\n\tjr\t$ra\n" else
+      if x = "min_caml_fisneg" then Printf.fprintf oc "\tc.lt.s\t$a0, $f0, $fzero\n\tjr\t$ra\n" else
+      if x = "min_caml_fiszero" then  (
+                                      (* (Printf.fprintf oc "\tc.lt.s\t$a0, $fzero, $f0\n";
+                                      Printf.fprintf oc "\tc.lt.s\t$s0, $f0, $fzero\n";
+                                      Printf.fprintf oc "\tadd\t$a0, $a0, $s0\n";
+                                      Printf.fprintf oc "\taddi\t$s0, $zero, 1\n";
+                                      Printf.fprintf oc "\tsub\t$a0, $s0, $a0" *)
+                                      Printf.fprintf oc "\tc.eq.s\t$a0, $f0, $fzero\n\tjr\t$ra\n"
+      ) else
       if x = "min_caml_fhalf" then  (Printf.fprintf oc "\tlui\t$s1, 16128\n";   (* 0.5 *)
                                     Printf.fprintf oc "\tmtc1\t$s1, $f29\n";
                                     Printf.fprintf oc "\tmul.s\t$f0, $f0, $f29\n\tjr\t$ra\n") else
-      if x = "min_caml_fless" then Printf.fprintf oc "\tc.lt.s\t$a0, $a0, $a1\n\tjr\t$ra\n" else   (* ここやばいかも *)
+      if x = "min_caml_fless" then Printf.fprintf oc "\tc.lt.s\t$a0, $f0, $f1\n\tjr\t$ra\n" else   
       if x = "min_caml_print_char" then Printf.fprintf oc "\toutc\t$a0\n\tjr\t$ra\n" else
       if x = "min_caml_print_int" then Printf.fprintf oc "\touti\t$a0\n\tjr\t$ra\n" else
       if x = "min_caml_read_int" then Printf.fprintf oc "\treadi\t$a0\n\tjr\t$ra\n" else
@@ -336,21 +341,26 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
   | (NonTail(a), CallDir(Id.L(x), ys, zs)) ->
       (* Printf.fprintf oc "\tmflr\t%s\n" (reg reg_tmp); *)
       g'_args oc [] ys zs;
-      if x = "min_caml_fsqr" then Printf.fprintf oc "\tsqrt\t$f0, $f0\n" else
+ (     if x = "min_caml_fsqr" then Printf.fprintf oc "\tmul.s\t$f0, $f0, $f0\n" else
       if x = "min_caml_sqrt" then Printf.fprintf oc "\tsqrt\t$f0, $f0\n" else
       if x = "min_caml_floor" then Printf.fprintf oc "\tfloor\t$f0, $f0\n" else
       if x = "min_caml_int_of_float" then Printf.fprintf oc "\tftoi\t$a0, $f0\n" else
-      if x = "min_caml_truncate" then Printf.fprintf oc "\tftoi\t$a0, $f0\n" else
+      if x = "min_caml_truncate" then Printf.fprintf oc "\tfloor\t$f0, $f0\n" else
       if x = "min_caml_float_of_int" then Printf.fprintf oc "\titof\t$f0, $a0\n" else
-      if x = "min_caml_fispos" then Printf.fprintf oc "\tslt\t$a0, $fzero, $f0\n" else
-      if x = "min_caml_fisneg" then Printf.fprintf oc "\tslt\t$a0, $f0, $zero\n" else
-      if x = "min_caml_fiszero" then (Printf.fprintf oc "\tslt\t$a0, $fzero, $f0\n";
-                                     Printf.fprintf oc "\tslt\t$s0, $f0, $fzero\n";
-                                     Printf.fprintf oc "\tadd\t$a0, $a0, $s0\n") else
+      if x = "min_caml_fispos" then Printf.fprintf oc "\tc.lt.s\t$a0, $fzero, $f0\n" else
+      if x = "min_caml_fisneg" then Printf.fprintf oc "\tc.lt.s\t$a0, $f0, $fzero\n" else
+      if x = "min_caml_fiszero" then (
+                                     (* Printf.fprintf oc "\tc.lt.s\t$a0, $fzero, $f0\n";
+                                     Printf.fprintf oc "\tc.lt.s\t$s0, $f0, $fzero\n";
+                                     Printf.fprintf oc "\tadd\t$a0, $a0, $s0\n";
+                                     Printf.fprintf oc "\taddi\t$s0, $zero, 1\n";
+                                     Printf.fprintf oc "\tsub\t$a0, $s0, $a0" *)
+                                     Printf.fprintf oc "\tc.eq.s\t$a0, $f0, $fzero\n"
+                                     ) else
       if x = "min_caml_fhalf" then  (Printf.fprintf oc "\tlui\t$s1, 16128\n";   (* 0.5 *)
                                     Printf.fprintf oc "\tmtc1\t$s1, $f29\n";
                                     Printf.fprintf oc "\tmul.s\t$f0, $f0, $f29\n") else
-      if x = "min_caml_fless" then Printf.fprintf oc "\tc.lt.s\t$a0, $a0, $a1\n" else (* ここやばいかも *)
+      if x = "min_caml_fless" then Printf.fprintf oc "\tc.lt.s\t$a0, $f0, $f1\n" else (* ここやばいかも *)
       if x = "min_caml_print_char" then Printf.fprintf oc "\toutc\t$a0\n" else
       if x = "min_caml_print_int" then Printf.fprintf oc "\touti\t$a0\n" else
       if x = "min_caml_read_int" then Printf.fprintf oc "\treadi\t$a0\n" else
@@ -361,11 +371,11 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
       Printf.fprintf oc "\taddi\t%s, %s, %d\n" (reg reg_sp) (reg reg_sp) ss;
       Printf.fprintf oc "\tjal\t%s\n" x;
       Printf.fprintf oc "\taddi\t%s, %s, %d\n" (reg reg_sp) (reg reg_sp) (-1 * ss);
-      Printf.fprintf oc "\tlw\t%s, %d(%s)\n" (reg reg_ra) (ss - 4) (reg reg_sp);
+      Printf.fprintf oc "\tlw\t%s, %d(%s)\n" (reg reg_ra) (ss - 4) (reg reg_sp);  ) );
       if List.mem a allregs && a <> regs.(0) then
         Printf.fprintf oc "\tadd\t%s, %s, %s\n" (reg a) (reg regs.(0)) (reg reg_zero)
       else if List.mem a allfregs && a <> fregs.(0) then
-        Printf.fprintf oc "\tadd.s\t%s, $fzero, %s\n" (reg a) (reg fregs.(0)); )
+        Printf.fprintf oc "\tadd.s\t%s, $fzero, %s\n" (reg a) (reg fregs.(0)); 
       (* Printf.fprintf oc "\tmtlr\t%s\n" (reg reg_tmp) *)
 and g'_tail_if oc e1 e2 b bn =   (*本質的に命令に関係するのはbnのみ*)
   let b_else = Id.genid (b ^ "_else") in
@@ -453,26 +463,6 @@ let f oc (Prog(data, fundefs, e)) =
   Printf.fprintf oc "\taddi\t$s1, $s1, -1\n";
   Printf.fprintf oc "\taddi\t$gp, $gp, 4\n";
   Printf.fprintf oc "\tj\tcreate_float_array_loop\n";
-  (* sin.. x - x^3 / 6 *)
-  (* Printf.fprintf oc "min_caml_sin:\n";
-  Printf.fprintf oc "\tlui\t$s1, 16576\n"; (* 6.0 *)
-  Printf.fprintf oc "\tmtc1\t$s1, $f30\n";
-  Printf.fprintf oc "\tadd.s\t$f29, $f0, $fzero\n";
-  Printf.fprintf oc "\tmul.s\t$f29, $f29, $f0\n";
-  Printf.fprintf oc "\tmul.s\t$f29, $f29, $f0\n";
-  Printf.fprintf oc "\tdiv.s\t$f29, $f29, $f30\n";
-  Printf.fprintf oc "\tsub.s\t$f0, $f0, $f29\n";
-  Printf.fprintf oc "\tjr\t$ra\n";
-  (* cos.. 1 - x^2 / 2 *)
-  Printf.fprintf oc "min_caml_cos:\n";
-  Printf.fprintf oc "\tlui\t$s1, 16256\n";   (* 1.0 *)
-  Printf.fprintf oc "\tmtc1\t$s1, $f30\n";   
-  Printf.fprintf oc "\tlui\t$s1, 16128\n";   (* 0.5 *)
-  Printf.fprintf oc "\tmtc1\t$s1, $f29\n";
-  Printf.fprintf oc "\tadd.s\t$f0, $f0, $f0\n";  (* x^2 *)
-  Printf.fprintf oc "\tmul.s\t$f0, $f0, $f29\n"; (* x^2 / 2 *)
-  Printf.fprintf oc "\tsub.s\t$f0, $f30, $f0\n";
-  Printf.fprintf oc "\tjr\t$ra\n"; *)
 
   Printf.fprintf oc "kernel_sin:\n";
   Printf.fprintf oc "\tlui\t$s1, 15914\n";
@@ -532,7 +522,15 @@ let f oc (Prog(data, fundefs, e)) =
 	Printf.fprintf oc "\tmul.s\t$f0, $f2, $f0\n";
 	Printf.fprintf oc "\tsub.s\t$f0, $f1, $f0\n";
   Printf.fprintf oc "\tjr\t$ra\n";
+  Printf.fprintf oc "minus_sin:\n";
+	Printf.fprintf oc "\tsw\t$ra, 4($sp)\n";
+	Printf.fprintf oc "\taddi\t$sp, $sp, 8\n";
+	Printf.fprintf oc "\tsub.s\t$f0, $fzero, $f0\n";
+	Printf.fprintf oc "\tlahi\t$ra, tmp.sin_148\n";
+	Printf.fprintf oc "\tlalo\t$ra, tmp.sin_148\n";
   Printf.fprintf oc "min_caml_sin:\n";
+  Printf.fprintf oc "\tc.lt.s\t$s0, $f0, $fzero\n";
+	Printf.fprintf oc "\tbne\t$s0, $zero, minus_sin\n";
   Printf.fprintf oc "\tlui\t$s1, 16457\n";
 	Printf.fprintf oc "\tori\t$s1, $s1, 4059\n";
 	Printf.fprintf oc "\tmtc1\t$s1, $f1\n";
@@ -569,8 +567,16 @@ let f oc (Prog(data, fundefs, e)) =
 	Printf.fprintf oc "\taddi	$sp, $sp, -8\n";
 	Printf.fprintf oc "\tlw	$ra, 4($sp)\n";
 	Printf.fprintf oc "\tsub.s	$f0, $fzero, $f0\n";
-	Printf.fprintf oc "\tjr	$ra\n";
+  Printf.fprintf oc "\tjr	$ra\n";
+  Printf.fprintf oc "minus_cos:\n";
+	Printf.fprintf oc "\tsw\t$ra, 4($sp)\n";
+	Printf.fprintf oc "\taddi\t$sp, $sp, 8\n";
+	Printf.fprintf oc "\tsub.s\t$f0, $fzero, $f0\n";
+	Printf.fprintf oc "\tlahi\t$ra, tmp.cos_137\n";
+	Printf.fprintf oc "\tlalo\t$ra, tmp.cos_137\n";
   Printf.fprintf oc "min_caml_cos:\n";
+  Printf.fprintf oc "\tc.lt.s\t$s0, $f0, $fzero\n";
+	Printf.fprintf oc "\tbne\t$s0, $zero, minus_cos\n";
   Printf.fprintf oc "\tlui\t$s1, 16457\n";
 	Printf.fprintf oc "\tori\t$s1, $s1, 4059\n";
 	Printf.fprintf oc "\tmtc1\t$s1, $f1\n";
@@ -620,7 +626,7 @@ let f oc (Prog(data, fundefs, e)) =
 Printf.fprintf oc
   "kernel_atan:
 	lui	$s1, 16042
-	ori	$s1, $s1, 43679
+	ori	$s1, $s1, 43690
 	mtc1	$s1, $f1
 	mul.s	$f1, $f1, $f0
 	mul.s	$f1, $f1, $f0
@@ -675,7 +681,7 @@ Printf.fprintf oc
 	mul.s	$f2, $f2, $f0
 	sub.s	$f1, $f1, $f2
 	lui	$s1, 15733
-	ori	$s1, $s1, 59333
+	ori	$s1, $s1, 59331
 	mtc1	$s1, $f2
 	mul.s	$f2, $f2, $f0
 	mul.s	$f2, $f2, $f0
@@ -693,10 +699,7 @@ Printf.fprintf oc
 	add.s	$f0, $f1, $f0
 	jr	$ra
 min_caml_atan:
-	lui	$s1, 0
-	ori	$s1, $s1, 0
-	mtc1	$s1, $f1
-	c.lt.s	$s0, $f0, $f1
+	c.lt.s	$s0, $f0, $fzero
 	beq	$s0, $zero, bne_else_atan.165
 	sub.s	$f0, $fzero, $f0
 	sw	$ra, 4($sp)
@@ -783,11 +786,15 @@ bne_else_atan.167:
   Printf.fprintf oc "\tstwu\tr1, -96(r1)\n"; *)
   (* Printf.fprintf oc "#\tmain program starts: \n"; *)
   Printf.fprintf oc "_min_caml_start:\n";
-  Printf.fprintf oc "\taddi\t$sp, $sp, 16384\n";
-  Printf.fprintf oc "\taddi\t$gp, $gp, 32000\n";
+  Printf.fprintf oc "\tlui\t$sp, 1\n";
+  Printf.fprintf oc "\tlui\t$gp, 3\n";
   stackset := S.empty;
   stackmap := [];
   g oc (NonTail("$zero"), e);
+  Printf.fprintf oc "last:\n";
+  Printf.fprintf oc "\tj\tlast"
+  (* Printf.fprintf oc "last:\n";
+  Printf.fprintf oc "\tj\tlast"; *)
   (* Printf.fprintf oc "#\tmain program ends\n"; *)
   (* Printf.fprintf oc "\tmr\tr3, %s\n" regs.(0); *)
   (* Printf.fprintf oc "\tlwz\tr1, 0(r1)\n";
