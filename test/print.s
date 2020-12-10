@@ -327,5 +327,3 @@ _min_caml_start:
 	outi	$a0
 	addi	$a0, $zero, 789
 	outi	$a0
-last:
-	j	last

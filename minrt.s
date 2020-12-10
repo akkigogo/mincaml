@@ -9916,5 +9916,3 @@ tmp.9106:
 	addi	$sp, $sp, -152
 	lw	$ra, 148($sp)
 	addi	$zero, $zero, 0
-last:
-	j	last

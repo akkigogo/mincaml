@@ -28,28 +28,28 @@ simm.mli simm.ml regAlloc.mli regAlloc.ml emit.mli emit.ml \
 main.mli debug.mli debug.ml main.ml
 
 # ���ƥ��ȥץ�����ब�������顢��������䤹
-TESTS = print sum-tail gcd sum fib ack even-odd \
-adder funcomp cls-rec cls-bug cls-bug2 cls-reg-bug \
-shuffle spill spill2 spill3 join-stack join-stack2 join-stack3 \
-join-reg join-reg2 non-tail-if non-tail-if2 \
-inprod inprod-rec inprod-loop matmul matmul-flat \
-manyargs
+# TESTS = print sum-tail gcd sum fib ack even-odd \
+# adder funcomp cls-rec cls-bug cls-bug2 cls-reg-bug \
+# shuffle spill spill2 spill3 join-stack join-stack2 join-stack3 \
+# join-reg join-reg2 non-tail-if non-tail-if2 \
+# inprod inprod-rec inprod-loop matmul matmul-flat \
+# manyargs
 
-do_test: $(TESTS:%=test/%.cmp)
+# do_test: $(TESTS:%=test/%.cmp)
 
-.PRECIOUS: test/%.s test/% test/%.res test/%.ans test/%.cmp
-TRASH = $(TESTS:%=test/%.s) $(TESTS:%=test/%) $(TESTS:%=test/%.res) $(TESTS:%=test/%.ans) $(TESTS:%=test/%.cmp)
+# .PRECIOUS: test/%.s test/% test/%.res test/%.ans test/%.cmp
+# TRASH = $(TESTS:%=test/%.s) $(TESTS:%=test/%) $(TESTS:%=test/%.res) $(TESTS:%=test/%.ans) $(TESTS:%=test/%.cmp)
 
-test/%.s: $(RESULT) test/%.ml
-	./$(RESULT) test/$*
-test/%: test/%.s libmincaml.S stub.c
-	$(CC) $(CFLAGS) -m32 $^ -lm -o $@
-test/%.res: test/%
-	$< > $@
-test/%.ans: test/%.ml
-	ocaml $< > $@
-test/%.cmp: test/%.res test/%.ans
-	diff $^ > $@
+# test/%.s: $(RESULT) test/%.ml
+# 	./$(RESULT) test/$*
+# test/%: test/%.s libmincaml.S stub.c
+# 	$(CC) $(CFLAGS) -m32 $^ -lm -o $@
+# test/%.res: test/%
+# 	$< > $@
+# test/%.ans: test/%.ml
+# 	ocaml $< > $@
+# test/%.cmp: test/%.res test/%.ans
+# 	diff $^ > $@
 
 min-caml.html: main.mli main.ml id.ml m.ml s.ml debug.mli debug.ml \
 		syntax.ml type.ml parser.mly lexer.mll typing.mli typing.ml kNormal.mli kNormal.ml \

@@ -769,11 +769,11 @@ void MIPSSimulator::outc(){
     else{
       myfile<<RegisterValues[r[1]]<<" ";
     }
-
+    // myfile<<RegisterValues[r[1]];
     count_ = (count_ + 1)%3;
 
     //myfile<<(char)RegisterValues[r[1]];
-    myfile2<<(char)RegisterValues[r[1]];
+    // myfile2<<(char)RegisterValues[r[1]];
 
     // cout<<(char)RegisterValues[r[1]];
     //cout<<'a';
@@ -867,10 +867,10 @@ void MIPSSimulator::ParseInstruction(){
 void MIPSSimulator::Execute()
 {
     getchar(); //to remove effect of pressing enter key while starting
-    int count_exec=0;
+    long count_exec=0;
 
     myfile.open ("print_output.txt", std::fstream::in | std::fstream::out | std::fstream::trunc);
-    myfile2.open("result.ppm", std::fstream::in | std::fstream::out | std::fstream::trunc);
+    // myfile2.open("result.ppm", std::fstream::in | std::fstream::out | std::fstream::trunc);
     // print_pc.open ("print_pc.txt", std::fstream::in | std::fstream::out | std::fstream::trunc);
     // print_register.open ("print_register.txt", std::fstream::in | std::fstream::out | std::fstream::trunc);
     // print_register2.open ("print_register2.txt", std::fstream::in | std::fstream::out | std::fstream::trunc);
@@ -913,7 +913,7 @@ void MIPSSimulator::Execute()
           cout<<"end"<<endl;
         }
         */
-        if (count_exec%10000000==0 && count_exec != 0){
+        if (count_exec%100000000==0 && count_exec != 0){
           cout<<"success:"<<count_exec<<endl;
         }
         count_exec++;
@@ -936,7 +936,7 @@ void MIPSSimulator::Execute()
     // PrintInstruction();
 
     myfile.close();
-    myfile2.close();
+    // myfile2.close();
     // print_pc.close();
     // print_register.close();
     // print_register2.close();

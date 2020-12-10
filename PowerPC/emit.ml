@@ -71,15 +71,6 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
       let s = load_label (reg reg_tmp) l in
       Printf.fprintf oc "%s\tlfd\t%s, 0(%s)\n" s (reg x) (reg reg_tmp) *)
   | NonTail(x), FLi(f) ->
-     (* Printf.fprintf oc "\taddi\t%s, %s, %ld\n" (reg x) (reg reg_zero) (gethi f) *)
-     (* let i = Int32.to_int (gethi f) in
-     Printf.fprintf stdout "f: %f i : %d" f i;
-     let n = i lsr 16 in             (* iを右に16ビット右シフト *)
-     let m = i lxor (n lsl 16) in
-     let r = reg x in
-     Printf.fprintf oc "\tlui\t$s1, %d\n" n;
-     Printf.fprintf oc "\tori\t$s1, $s1, %d\n" m ;
-     Printf.fprintf oc "\tmtc1\t$s1, %s\n" r *)
      let i = Int32.bits_of_float f in
      let a = Int32.shift_right i 16 in
      let b = Int32.logand i (Int32.of_int 65535) in
@@ -791,10 +782,8 @@ bne_else_atan.167:
   stackset := S.empty;
   stackmap := [];
   g oc (NonTail("$zero"), e);
-  Printf.fprintf oc "last:\n";
-  Printf.fprintf oc "\tj\tlast"
   (* Printf.fprintf oc "last:\n";
-  Printf.fprintf oc "\tj\tlast"; *)
+  Printf.fprintf oc "\tj\tlast" *)
   (* Printf.fprintf oc "#\tmain program ends\n"; *)
   (* Printf.fprintf oc "\tmr\tr3, %s\n" regs.(0); *)
   (* Printf.fprintf oc "\tlwz\tr1, 0(r1)\n";
