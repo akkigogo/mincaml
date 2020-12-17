@@ -34,8 +34,12 @@ and exp =
   | CallDir of Id.l * Id.t list * Id.t list
   | Save of Id.t * Id.t (* �쥸�����ѿ����ͤ򥹥��å��ѿ�����¸ *)
   | Restore of Id.t (* �����å��ѿ������ͤ����� *)
+  | Global_Lw of int * id_or_imm
+  | Global_Lwf of int * id_or_imm
+  | Global_Sw of Id.t * int * id_or_imm
+  | Global_Swf of Id.t * int * id_or_imm
 type fundef = { name : Id.l; args : Id.t list; fargs : Id.t list; body : t; ret : Type.t }
-type prog = Prog of (Id.l * float) list * fundef list * t
+type prog = Prog of (Id.l * float) list * fundef list * t * (Id.t * (int * Id.t * Type.t * int)) list * (Id.t * int) list * (Id.t * float) list
 
 val fletd : Id.t * exp * t -> t (* shorthand of Let for float *)
 val seq : exp * t -> t (* shorthand of Let for unit *)

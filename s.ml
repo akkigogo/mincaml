@@ -43,3 +43,7 @@ val l4 : S.t = <abstr>
 
 # S.mem "y" l4;;
 - : bool = false *)
+
+let l1 = of_list ["a"; "b"; "c"]
+let l2 = of_list ["x"; "y"; "a"]
+let l3 = S.diff l1 l2

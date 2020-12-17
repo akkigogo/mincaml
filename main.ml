@@ -1,5 +1,7 @@
 let limit = ref 1000
 
+exception My_Error2
+
 let rec iter n e = (* ��Ŭ�������򤯤꤫���� (caml2html: main_iter) *)
   Format.eprintf "iteration %d@." n;
   if n = 0 then e else
@@ -30,10 +32,10 @@ let lexbuf outchan l = (* �Хåե��򥳥�ѥ��뤷�ƥ����ͥ�
    Printf.fprintf debug_outchan "\nafter tuple_flattening\n\n"; 
    Debug.out_closure debug_outchan s6;
   Emit.f outchan
-    (RegAlloc.f
+      (RegAlloc.f
        (Simm.f
-          (Virtual.f
-            s5)))
+         (Virtual.f
+            s5))) 
 
 let string s = lexbuf stdout (Lexing.from_string s) (* 文字列をコンパイルして標準出力に表示する (caml2html: main_string) *)
 

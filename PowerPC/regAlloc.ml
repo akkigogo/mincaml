@@ -150,6 +150,10 @@ and g' dest cont regenv = function (* 各命令のレジスタ割り当て (caml
       else
         g'_call dest cont regenv exp (fun ys zs -> CallDir(Id.L(x), ys, zs)) ys zs
   | Save(x, y) -> assert false
+  | Global_Lw (x, y') -> (Ans(Global_Lw(x, find' y' regenv)), regenv)
+  | Global_Lwf (x, y') -> (Ans(Global_Lwf(x, find' y' regenv)), regenv)
+  | Global_Sw (x, y, z') -> (Ans(Global_Sw(find x Type.Int regenv, y, find' z' regenv)), regenv)
+  | Global_Swf (x, y, z') -> (Ans(Global_Swf(find x Type.Int regenv, y, find' z' regenv)), regenv)
 and g'_if dest cont regenv exp constr e1 e2 = (* ifのレジスタ割り当て (caml2html: regalloc_if) *)
   let (e1', regenv1) = g dest cont regenv e1 in
   let (e2', regenv2) = g dest cont regenv e2 in
@@ -213,8 +217,8 @@ let h { name = Id.L(x); args = ys; fargs = zs; body = e; ret = t } = (* 関数�
   let (e', regenv') = g (a, t) (Ans(Mr(a))) regenv e in
   { name = Id.L(x); args = arg_regs; fargs = farg_regs; body = e'; ret = t }
 
-let f (Prog(data, fundefs, e)) = (* プログラム全体のレジスタ割り当て (caml2html: regalloc_f) *)
+let f (Prog(data, fundefs, e, global_data, int_data, float_data)) = (* プログラム全体のレジスタ割り当て (caml2html: regalloc_f) *)
   Format.eprintf "register allocation: may take some time (up to a few minutes, depending on the size of functions)@.";
   let fundefs' = List.map h fundefs in
   let e', regenv' = g (Id.gentmp Type.Unit, Type.Unit) (Ans(Nop)) M.empty e in
-  Prog(data, fundefs', e')
+  Prog(data, fundefs', e', global_data, int_data, float_data)

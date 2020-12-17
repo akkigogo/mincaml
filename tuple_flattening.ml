@@ -131,4 +131,4 @@ let rec g tenv1 tenv2 exp = match exp with
 
 
 let rec f prog = match prog with
-  | Prog (fl, t) -> Prog (fl,  g [] [] t)
+  | Prog (fl, t, k, a, b) -> Prog (fl,  g [] [] t, k, a, b)

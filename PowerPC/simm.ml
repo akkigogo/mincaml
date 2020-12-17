@@ -37,5 +37,5 @@ and g' env = function (* ��̿���16bit¨�ͺ�Ŭ�� (caml2html: si
 let h { name = l; args = xs; fargs = ys; body = e; ret = t } = (* �ȥåץ�٥�ؿ���16bit¨�ͺ�Ŭ�� *)
   { name = l; args = xs; fargs = ys; body = g M.empty e; ret = t }
 
-let f (Prog(data, fundefs, e)) = (* �ץ���������Τ�16bit¨�ͺ�Ŭ�� *)
-  Prog(data, List.map h fundefs, g M.empty e)
+let f (Prog(data, fundefs, e, global_data, int_data, float_data)) = (* �ץ���������Τ�16bit¨�ͺ�Ŭ�� *)
+  Prog(data, List.map h fundefs, g M.empty e, global_data, int_data, float_data)

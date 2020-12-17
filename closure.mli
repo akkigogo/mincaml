@@ -1,4 +1,5 @@
 type closure = { entry : Id.l; actual_fv : Id.t list }
+type i_or_f = MyInt of int | MyFloat of float
 type t =
   | Unit
   | Int of int
@@ -29,7 +30,7 @@ type fundef = { name : Id.l * Type.t;
                 args : (Id.t * Type.t) list;
                 formal_fv : (Id.t * Type.t) list;
                 body : t }
-type prog = Prog of fundef list * t
+type prog = Prog of fundef list * t * (Id.t * (int * Id.t * Type.t * int)) list * (Id.t * int) list * (Id.t * float) list
 
 val fv : t -> S.t
 val f : KNormal.t -> prog

@@ -36,9 +36,13 @@ and exp = (* 一つ一つの命令に対応する式 (caml2html: sparcasm_exp) *
   | CallDir of Id.l * Id.t list * Id.t list
   | Save of Id.t * Id.t (* レジスタ変数の値をスタック変数へ保存 (caml2html: sparcasm_save) *)
   | Restore of Id.t (* スタック変数から値を復元 (caml2html: sparcasm_restore) *)
+  | Global_Lw of int * id_or_imm
+  | Global_Lwf of int * id_or_imm
+  | Global_Sw of Id.t * int * id_or_imm
+  | Global_Swf of Id.t * int * id_or_imm
 type fundef = { name : Id.l; args : Id.t list; fargs : Id.t list; body : t; ret : Type.t }
 (* プログラム全体 = 浮動小数点数テーブル + トップレベル関数 + メインの式　(caml2html: sparcasm_prog) *)
-type prog = Prog of (Id.l * float) list * fundef list * t
+type prog = Prog of (Id.l * float) list * fundef list * t * (Id.t * (int * Id.t * Type.t * int)) list * (Id.t * int) list * (Id.t * float) list
 
 let fletd(x, e1, e2) = Let((x, Type.Float), e1, e2)
 let seq(e1, e2) = Let((Id.gentmp Type.Unit, Type.Unit), e1, e2)
@@ -85,6 +89,8 @@ let rec fv_exp = function
   | IfFEq(x, y, e1, e2) | IfFLT(x, y, e1, e2) -> x :: y :: remove_and_uniq S.empty (fv e1 @ fv e2) (* uniq here just for efficiency *)
   | CallCls(x, ys, zs) -> x :: ys @ zs
   | CallDir(_, ys, zs) -> ys @ zs
+  | Global_Lw (_, x) | Global_Lwf (_, x) -> fv_id_or_imm x
+  | Global_Sw (x, _, y) | Global_Swf (x, _, y) -> x :: fv_id_or_imm y
 and fv = function
   | Ans(exp) -> fv_exp exp
   | Let((x, t), exp, e) ->
@@ -96,4 +102,5 @@ let rec concat e1 xt e2 =
   | Ans(exp) -> Let(xt, exp, e2)
   | Let(yt, exp, e1') -> Let(yt, exp, concat e1' xt e2)
 
-let align i = (if i mod 8 = 0 then i else i + 4)
+(* let align i = (if i mod 8 = 0 then i else i + 4) *)
+let align i = i

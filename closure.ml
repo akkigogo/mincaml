@@ -1,4 +1,5 @@
 type closure = { entry : Id.l; actual_fv : Id.t list }
+type i_or_f = MyInt of int | MyFloat of float
 type t = (* クロージャ変換後の式 (caml2html: closure_t) *)
   | Unit
   | Int of int
@@ -29,7 +30,7 @@ type fundef = { name : Id.l * Type.t;
                 args : (Id.t * Type.t) list;
                 formal_fv : (Id.t * Type.t) list;
                 body : t }
-type prog = Prog of fundef list * t
+type prog = Prog of fundef list * t * (Id.t * (int * Id.t * Type.t * int)) list * (Id.t * int) list * (Id.t * float) list
 
 let rec fv = function
   | Unit | Int(_) | Float(_) | ExtArray(_) -> S.empty
@@ -45,10 +46,10 @@ let rec fv = function
   | Put(x, y, z) -> S.of_list [x; y; z]
 
 let toplevel : fundef list ref = ref []
-let newtoplevel : fundef list ref = ref []
+(* let newtoplevel : fundef list ref = ref [] *)
 
-exception Not_Found
-
+exception My_Error1
+(* 
 let rec find_fun label l = match l with
   | [] ->  raise Not_Found
   | fundef1 :: rest -> let (label1, _) = fundef1.name in 
@@ -58,7 +59,64 @@ let rec find_fun label l = match l with
 
 let rec arg_name arglist = match arglist with
   | [] -> []
-  | (a, b) :: rest -> a::(arg_name rest)
+  | (a, b) :: rest -> a::(arg_name rest) *)
+let dp = ref 20000
+let int_data = ref []
+let float_data = ref []
+let global_data = ref []
+let type_data = ref []
+(* type t = 
+  | Unit
+  | Bool
+  | Int
+  | Float
+  | Fun of t list * t (* arguments are uncurried *)
+  | Tuple of t list
+  | Array of t
+  | Var of t option ref *)
+let rec tuple_alloc l1 = match l1 with
+  | [] -> ()
+  | i1::rest -> 
+    (
+      try (
+        let x = List.assoc i1 !int_data in
+        dp := !dp + 4;
+        global_data := (i1, (1, i1, Type.Int, !dp))::(!global_data);
+        tuple_alloc rest
+      )
+      with _ -> (
+        let x = List.assoc i1 !float_data in
+        dp := !dp + 4;
+        global_data := (i1, (1, i1, Type.Float, !dp))::(!global_data); 
+        tuple_alloc rest
+      )
+    )
+  
+let alloc i1 e = match e with
+    | KNormal.Int (n1) -> int_data := (i1, n1)::(!int_data); type_data := (i1, Type.Int)::(!type_data)
+    | KNormal.Float (n1) -> float_data := (i1, n1)::(!float_data); type_data := (i1, Type.Float)::(!type_data)
+    | KNormal.Tuple (l1) -> int_data := (i1, !dp)::(!int_data); tuple_alloc l1
+    | KNormal.ExtFunApp (j1, l1) -> 
+      (
+      let x::[y] = l1 in
+      if (j1 = "create_array")
+        then (global_data := (i1, ((List.assoc x !int_data), y, (List.assoc x !type_data), !dp))::(!global_data); int_data := (i1, !dp)::(!int_data); dp := 4 * (List.assoc x !int_data) + !dp; type_data := (i1, Type.Array(Type.Int))::(!type_data))
+        else 
+          if (j1 = "create_float_array")
+            then (global_data := (i1, ((List.assoc x !int_data), y, Type.Float, !dp))::(!global_data); int_data := (i1, !dp)::(!int_data); dp := 4 * (List.assoc x !int_data) + !dp; type_data := (i1, Type.Array(Type.Float))::(!type_data))
+            else assert false
+      )
+    | KNormal.Get(x, y) -> let a = (let (_, b, _, _) = List.assoc x !global_data in List.assoc b !int_data) in int_data := (i1, a)::(!int_data); type_data := (i1, Type.Int)::(!type_data)
+    | _ -> ()
+
+let fv2 e = S.diff (S.diff (fv e) (S.of_list (List.map (fun x -> let (a, _) = x in a) !global_data))) (S.of_list (List.map (fun x -> let (a, _) = x in a) !int_data))
+  
+let rec globalize e = match e with
+  | KNormal.IfEq (i1, i2, e1, e2) -> globalize e1; globalize e2   (* 多分if文はレイトレ では関係ない *)
+  | KNormal.IfLE (i1, i2, e1, e2) -> globalize e1; globalize e2
+  | KNormal.Let ((i1, t1), e1, e2) -> alloc i1 e1; globalize e2
+  | KNormal.LetTuple (l1, i1, e1) -> globalize e1
+  | _ -> ()         (* 関数定義があった瞬間にglobal化を終了 *)
 
 (* 「自由変数がないとわかっていて、普通に呼び出せる」関数の集合known *)
 let rec g env known = function (* クロージャ変換ルーチン本体 (caml2html: closure_g) *)
@@ -90,7 +148,7 @@ let rec g env known = function (* クロージャ変換ルーチン本体 (caml2
       (* 本当に自由変数がなかったか、変換結果e1'を確認する *)
       (* 注意: e1'にx自身が変数として出現する場合はclosureが必要!
          (thanks to nuevo-namasute and azounoman; test/cls-bug2.ml����) *)
-      let zs = S.diff (fv e1') (S.of_list (List.map fst yts)) in
+      let zs = S.diff (fv2 e1') (S.of_list (List.map fst yts)) in
       let known', e1' =
         if S.is_empty zs then known', e1' else
         (* 駄目だったら状態(toplevelの値)を戻して、クロージャ変換をやり直す  *)
@@ -99,12 +157,12 @@ let rec g env known = function (* クロージャ変換ルーチン本体 (caml2
          toplevel := toplevel_backup;
          let e1' = g (M.add_list yts env') known e1 in
          known, e1') in
-      let zs = S.elements (S.diff (fv e1') (S.add x (S.of_list (List.map fst yts)))) in (* 自由変数のリスト *)
+      let zs = S.elements (S.diff (fv2 e1') (S.add x (S.of_list (List.map fst yts)))) in (* 自由変数のリスト *)
       let zts = List.map (fun z -> (z, M.find z env')) zs in (* ここで自由変数zの型を引くために引数envが必要 *)
       toplevel := { name = (Id.L(x), t); args = yts; formal_fv = zts; body = e1' } :: !toplevel; (* トップレベル関数を追加 *)
       (* newtoplevel := { name = (Id.L(x), t); args = yts@zts; formal_fv = []; body = e1' } :: !newtoplevel; *)
       let e2' = g env' known' e2 in
-      if S.mem x (fv e2') then (* xが変数としてe2'に出現する *)
+      if S.mem x (fv2 e2') then (* xが変数としてe2'に出現する *)
         MakeCls((x, t), { entry = Id.L(x); actual_fv = zs }, e2') (* 出現していたら削除しない *)
       else
         (Format.eprintf "elimina＾ing closure(s) %s@." x;
@@ -112,7 +170,7 @@ let rec g env known = function (* クロージャ変換ルーチン本体 (caml2
   | KNormal.App(x, ys) when S.mem x known -> (* 関数適用の場合 (caml2html: closure_app) *)
       Format.eprintf "directly applying %s@." x;
       AppDir(Id.L(x), ys)
-  | KNormal.App(f, xs) -> 
+  | KNormal.App(f, xs) ->
      (* (try
       let thisfun = find_fun (L(f)) !toplevel in
       let inserted_fv = arg_name thisfun.formal_fv in
@@ -125,7 +183,14 @@ let rec g env known = function (* クロージャ変換ルーチン本体 (caml2
   | KNormal.ExtArray(x) -> ExtArray(Id.L(x))
   | KNormal.ExtFunApp(x, ys) -> AppDir(Id.L("min_caml_" ^ x), ys)
 
+let rec de1 l = match l with
+  | [] -> ()
+  | (x, _) :: rest -> print_string x; de1 rest
+
 let f e =
   toplevel := [];
+  globalize e;
+  print_string "start\n";
+  de1 !global_data;
   let e' = g M.empty S.empty e in
-  Prog(List.rev !toplevel, e')
+  Prog(List.rev !toplevel, e', !global_data, !int_data, !float_data)

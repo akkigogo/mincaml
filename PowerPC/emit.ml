@@ -1,5 +1,7 @@
 open Asm
 
+exception My_Error_hd
+
 external gethi : float -> int32 = "gethi"
 (* external getlo : float -> int32 = "getlo" *)
 
@@ -21,7 +23,7 @@ let locate x =
     | y :: zs when x = y -> 0 :: List.map succ (loc zs)
     | y :: zs -> List.map succ (loc zs) in
   loc !stackmap
-let offset x = 4 * List.hd (locate x)
+let offset x = 4 * (try List.hd (locate x) with _ -> raise My_Error_hd)
 let stacksize () = align ((List.length !stackmap + 1) * 4)
 
 let reg r =
@@ -125,18 +127,38 @@ and g' oc = function (* 各命令のアセンブリ生成 (caml2html: emit_gprim
   | NonTail(_), Save(x, y) -> assert (S.mem y !stackset); ()
   (* 復帰の仮想命令の実装 (caml2html: emit_restore) *)
   | NonTail(x), Restore(y) when List.mem x allregs ->
-      Printf.fprintf oc "\tlw\t%s, %d(%s)\n" (reg x) (offset y) (reg reg_sp)
+      (try (Printf.fprintf oc "\tlw\t%s, %d(%s)\n" (reg x) (offset y) (reg reg_sp))  with _ -> ())
   | NonTail(x), Restore(y) ->
       assert (List.mem x allfregs);
       Printf.fprintf oc "\tlwc1\t%s, %d(%s)\n" (reg x) (offset y) (reg reg_sp)
+  | NonTail(x), Global_Lw(y, V(z)) -> 
+    Printf.fprintf oc "\taddi\t%s, %s, %d\n" (reg reg_my_temp) (reg z) y;
+    Printf.fprintf oc "\tlw\t%s, 0(%s)\n" (reg x) (reg reg_my_temp) 
+  | NonTail(x), Global_Lw(y, C(z)) -> 
+    Printf.fprintf oc "\tlw\t%s, %d($zero)\n" (reg x) (y + z)
+  | NonTail(x), Global_Lwf(y, V(z)) -> 
+    Printf.fprintf oc "\taddi\t%s, %s, %d\n" (reg reg_my_temp) (reg z) y;
+    Printf.fprintf oc "\tlwc1\t%s, 0(%s)\n" (reg x) (reg reg_my_temp) 
+  | NonTail(x), Global_Lwf(y, C(z)) -> 
+    Printf.fprintf oc "\tlwc1\t%s, %d($zero)\n" (reg x) (y + z)
+  | NonTail(_), Global_Sw(x, y, V(z)) ->
+    Printf.fprintf oc "\taddi\t%s, %s, %d\n" (reg reg_my_temp) (reg z) y;
+    Printf.fprintf oc "\tsw\t%s, 0(%s)\n" (reg x) (reg reg_my_temp)
+  | NonTail(_), Global_Sw(x, y, C(z)) -> 
+    Printf.fprintf oc "\tsw\t%s, %d($zero)\n" (reg x) (y + z)
+  | NonTail(_), Global_Swf(x, y, V(z)) ->
+    Printf.fprintf oc "\taddi\t%s, %s, %d\n" (reg reg_my_temp) (reg z) y;
+    Printf.fprintf oc "\tswc1\t%s, 0(%s)\n" (reg x) (reg reg_my_temp)
+  | NonTail(_), Global_Swf(x, y, C(z)) -> 
+    Printf.fprintf oc "\tswc1\t%s, %d($zero)\n" (reg x) (y + z)
   (* 末尾だったら計算結果を第一レジスタにセットしてret (caml2html: emit_tailret) *)
-  | Tail, (Nop | Stw _ | Stfd _ | Comment _ | Save _ as exp) ->
+  | Tail, (Nop | Stw _ | Stfd _ | Comment _ | Save _ | Global_Sw _ | Global_Swf _ as exp) ->
       g' oc (NonTail(Id.gentmp Type.Unit), exp);
       Printf.fprintf oc "\tjr\t$ra\n";
-  | Tail, (Li _ | SetL _ | Mr _ | Neg _ | Add _ | Sub _ | Slw _ | Slr _ | Lwz _ as exp) ->
+  | Tail, (Li _ | SetL _ | Mr _ | Neg _ | Add _ | Sub _ | Slw _ | Slr _ | Lwz _ | Global_Lw _ as exp) ->
       g' oc (NonTail(regs.(0)), exp);
       Printf.fprintf oc "\tjr\t$ra\n";
-  | Tail, (FLi _ | FMr _ | FNeg _ | FAdd _ | FSub _ | FMul _ | FDiv _ | Lfd _ as exp) ->
+  | Tail, (FLi _ | FMr _ | FNeg _ | FAdd _ | FSub _ | FMul _ | FDiv _ | Lfd _ | Global_Lwf _ as exp) ->
       g' oc (NonTail(fregs.(0)), exp);
       Printf.fprintf oc "\tjr\t$ra\n";
   | Tail, (Restore(x) as exp) ->
@@ -414,7 +436,37 @@ let h oc { name = Id.L(x); args = _; fargs = _; body = e; ret = _ } =
   stackmap := [];
   g oc (Tail, e)
 
-let f oc (Prog(data, fundefs, e)) =
+(* global_dataの初期化をここでやる。
+(Id.t * (int * Id.t * Type.t * int)) list
+*)
+let rec insert_int oc addr num =
+  if num = 0 then ()
+  else (Printf.fprintf oc "\tsw\t$s0, %d($zero)\n" addr; insert_int oc (addr + 4) (num - 1))
+let rec insert_float oc addr num =
+  if num = 0 then ()
+  else (Printf.fprintf oc "\tswc1\t$f0, %d($zero)\n" addr; insert_float oc (addr + 4) (num - 1))
+let rec initiate_global oc global_data int_data float_data = match global_data with
+  | [] -> ()
+  | (_, (length, id1, Type.Float, addr))::rest -> 
+    (
+     let i = Int32.bits_of_float (List.assoc id1 float_data) in
+     let a = Int32.shift_right i 16 in
+     let b = Int32.logand i (Int32.of_int 65535) in
+     Printf.fprintf oc "\tlui\t$s1, %d\n" (Int32.to_int a);
+     Printf.fprintf oc "\tori\t$s1, $s1, %d\n" (Int32.to_int b);
+     Printf.fprintf oc "\tmtc1\t$s1, $f0\n";
+     insert_float oc addr length;
+     initiate_global oc rest int_data float_data
+    )
+  | (_, (length, id1, _, addr))::rest -> 
+    (
+      Printf.fprintf oc "\taddi\t$s0, $zero, %d\n" (List.assoc id1 int_data);
+      insert_int oc addr length;
+      initiate_global oc rest int_data float_data
+    )
+  
+
+let f oc (Prog(data, fundefs, e, global_data, int_data, float_data)) =
   Format.eprintf "generating assembly...@.";
   if data <> [] then
     (Printf.fprintf oc "\t.data\n\t.literal8\n";
@@ -428,6 +480,7 @@ let f oc (Prog(data, fundefs, e)) =
   (* Printf.fprintf oc "\t.text\n";
   Printf.fprintf oc "\t.globl _min_caml_start\n";
   Printf.fprintf oc "\t.align 2\n"; *)
+  initiate_global oc global_data int_data float_data;
   Printf.fprintf oc "\tj\t_min_caml_start\n";
   (* ライブラリ関数〜*)
   (* min_caml_create_array *)

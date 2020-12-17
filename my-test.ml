@@ -1,42 +1,30 @@
-let rec mul l m n a b c =
-  let rec loop1 i =
-    if i < 0 then () else
-    let rec loop2 j =
-      if j < 0 then () else
-      let rec loop3 k =
-        if k < 0 then () else
-        (c.(i).(j) <- c.(i).(j) +. a.(i).(k) *. b.(k).(j);
-         loop3 (k - 1)) in
-      loop3 (m - 1);
-      loop2 (j - 1) in
-    loop2 (n - 1);
-    loop1 (i - 1) in
-  loop1 (l - 1) in
-let dummy = Array.make 0 0. in
-let rec make m n =
-  let mat = Array.make m dummy in
-  let rec init i =
-    if i < 0 then () else
-    (mat.(i) <- Array.make n 0.;
-     init (i - 1)) in
-  init (m - 1);
-  mat in
-let a = make 2 3 in
-let b = make 3 2 in
-let c = make 2 2 in
-a.(0).(0) <- 1.; a.(0).(1) <- 2.; a.(0).(2) <- 3.;
-a.(1).(0) <- 4.; a.(1).(1) <- 5.; a.(1).(2) <- 6.;
-b.(0).(0) <- 7.; b.(0).(1) <- 8.;
-b.(1).(0) <- 9.; b.(1).(1) <- 10.;
-b.(2).(0) <- 11.; b.(2).(1) <- 12.;
-mul 2 3 2 a b c;
-print_int (int_of_float ((floor (c.(0).(0)))));
-(* print_newline(); *)
-print_char 10;
-print_int (int_of_float ((floor (c.(0).(1)))));
-print_char 10;
-(* print_newline(); *)
-print_int (int_of_float ((floor (c.(1).(0)))));
-print_char 10;
-(* print_newline(); *)
-print_int (int_of_float ((floor (c.(1).(1)))));
+(* let l = create_array 3 0. in
+let rec f x y = l.(x) <- y in
+let rec g z = l.(z) in
+f 1 2.;
+f 2 3.;
+f 0 1.;
+print_int (int_of_float (g 0));
+print_int (int_of_float (g 1));
+print_int (int_of_float (g 2)) *)
+
+(* let l = create_array 3 (1, 1.) in
+let rec f x y = l.(x) <- (y, 1.) in
+let rec g z = let (a, b) = l.(z) in a in
+f 1 2;
+print_int (g 1) *)
+(* 
+let l = create_array 3 1 in
+let m = create_array 4 l in
+let rec f x y = m.(x).(y) in
+print_int (f 1 2) *)
+
+(* let l = create_array 3 1 in
+let rec f m x = m.(x) in
+let rec g y = f l y in
+print_int (g 1) *)
+
+let l = (1, 2) in
+let rec f x =
+  let (a, b) = l in a + x in
+print_int (f 4)

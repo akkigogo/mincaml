@@ -184,4 +184,4 @@ let rec out_closure_fundef_lis oc = function
     | f1::rest -> out_closure_fundef oc f1; Printf.fprintf oc ("\n"); out_closure_fundef_lis oc rest
 
 let out_closure oc  = function
-  | Prog (fl, e) -> out_closure_fundef_lis oc fl; Printf.fprintf oc ("\n"); out_closure1 oc e
+  | Prog (fl, e, global_data, _, _) -> out_closure_fundef_lis oc fl; Printf.fprintf oc ("\n"); out_closure1 oc e
